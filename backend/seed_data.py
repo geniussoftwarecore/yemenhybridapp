@@ -19,7 +19,7 @@ async def seed_data():
             full_name="Admin User",
             email="admin@yemenhybrid.com",
             phone="+967-1-234-567",
-            role=UserRole.ADMIN,
+            role=UserRole.admin,
             password_hash=hashed_password,
             is_active=True
         )
@@ -28,7 +28,7 @@ async def seed_data():
             full_name="Sales User", 
             email="sales@yemenhybrid.com",
             phone="+967-1-234-568",
-            role=UserRole.SALES,
+            role=UserRole.sales,
             password_hash=hashed_password,
             is_active=True
         )
@@ -37,7 +37,7 @@ async def seed_data():
             full_name="Engineer User",
             email="engineer@yemenhybrid.com", 
             phone="+967-1-234-569",
-            role=UserRole.ENGINEER,
+            role=UserRole.engineer,
             password_hash=hashed_password,
             is_active=True
         )

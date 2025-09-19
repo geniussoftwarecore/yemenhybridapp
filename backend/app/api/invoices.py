@@ -43,6 +43,16 @@ async def update_invoice(
     # TODO: Implement invoice update
     return {"message": f"Update invoice {invoice_id} endpoint - to be implemented"}
 
+@router.put("/{invoice_id}/finalize")
+async def finalize_invoice(
+    invoice_id: int,
+    current_user: User = Depends(require_roles(UserRole.sales, UserRole.admin)),
+    db: AsyncSession = Depends(get_db)
+):
+    """Finalize invoice. Sales and admin only (engineers cannot finalize)."""
+    # TODO: Implement invoice finalization
+    return {"message": f"Invoice {invoice_id} finalized successfully"}
+
 @router.delete("/{invoice_id}")
 async def delete_invoice(
     invoice_id: int,

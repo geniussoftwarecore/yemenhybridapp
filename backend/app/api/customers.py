@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..core.deps import get_db, get_current_user
+from ..core.deps import get_db, get_current_user, require_roles
+from ..db.models import User, UserRole
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
@@ -45,9 +46,9 @@ async def update_customer(
 @router.delete("/{customer_id}")
 async def delete_customer(
     customer_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(require_roles(UserRole.admin)),
     db: AsyncSession = Depends(get_db)
 ):
-    """Delete customer."""
+    """Delete customer. Admin only."""
     # TODO: Implement customer deletion
     return {"message": f"Delete customer {customer_id} endpoint - to be implemented"}

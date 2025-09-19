@@ -13,7 +13,7 @@ from .db.session import engine
 from .db.base import Base
 
 # Import all routers
-from .api import auth, customers, vehicles, workorders, media, invoices, reports
+from .api import auth, customers, vehicles, workorders, media, invoices, reports, notifications, approvals
 
 # Configure logging
 logging.basicConfig(
@@ -115,6 +115,8 @@ app.include_router(workorders.router, prefix="/api/v1")
 app.include_router(media.router, prefix="/api/v1")
 app.include_router(invoices.router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
+app.include_router(notifications.router, prefix="/api/v1")
+app.include_router(approvals.router, prefix="/api/v1")
 
 # Global exception handler
 @app.exception_handler(Exception)

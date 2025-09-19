@@ -15,8 +15,9 @@ pytestmark = pytest.mark.asyncio
 @pytest_asyncio.fixture
 async def async_client():
     """Create async test client."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        yield ac
+    from fastapi.testclient import TestClient
+    with TestClient(app) as client:
+        yield client
 
 
 @pytest_asyncio.fixture
@@ -191,6 +192,42 @@ class TestRoleBasedAccess:
         # Engineers cannot delete work orders (admin only)
         response = await async_client.delete("/api/v1/workorders/1", headers=headers)
         assert response.status_code == 403
+        
+        # Engineers cannot send notifications to customers (sales/admin only)
+        response = await async_client.post("/api/v1/notifications/send-email", headers=headers, json={})
+        assert response.status_code == 403
+        
+        # Engineers cannot send approvals to customers (sales/admin only)
+        response = await async_client.post("/api/v1/approvals/send-to-customer", headers=headers, json={})
+        assert response.status_code == 403
+        
+        # Engineers cannot finalize invoices (sales/admin only)
+        response = await async_client.put("/api/v1/invoices/1/finalize", headers=headers, json={})
+        assert response.status_code == 403
+
+    async def test_sales_notification_access(self, async_client: AsyncClient):
+        """Test sales can send notifications and approvals to customers."""
+        headers = await self.get_auth_headers(async_client, "sales@yemenhybrid.com", "Passw0rd!")
+        
+        # Sales can send email notifications
+        response = await async_client.post("/api/v1/notifications/send-email", headers=headers, json={})
+        assert response.status_code != 403
+        
+        # Sales can send WhatsApp notifications
+        response = await async_client.post("/api/v1/notifications/send-whatsapp", headers=headers, json={})
+        assert response.status_code != 403
+        
+        # Sales can create approval requests
+        response = await async_client.post("/api/v1/approvals/", headers=headers, json={})
+        assert response.status_code != 403
+        
+        # Sales can send approvals to customers
+        response = await async_client.post("/api/v1/approvals/send-to-customer", headers=headers, json={})
+        assert response.status_code != 403
+        
+        # Sales can finalize invoices
+        response = await async_client.put("/api/v1/invoices/1/finalize", headers=headers, json={})
+        assert response.status_code != 403
 
     async def test_unauthenticated_access(self, async_client: AsyncClient):
         """Test that unauthenticated requests are rejected."""
