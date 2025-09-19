@@ -8,7 +8,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # Database (sync URL for Alembic, converted to async for app)
-    database_url: str = "sqlite+pysqlite:///./app.db"
+    database_url: str = os.getenv("DATABASE_URL", "sqlite+pysqlite:///./app.db")
     
     @property
     def async_database_url(self) -> str:
@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_hours: int = 24
     
-    # CORS
-    allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    # CORS - Allow all origins for Replit environment
+    allowed_origins: str = "*"
     
     # Storage
     storage_dir: str = "./storage"
@@ -51,8 +51,10 @@ class Settings(BaseSettings):
     def cors_origins(self) -> List[str]:
         """Parse CORS origins from string."""
         if isinstance(self.allowed_origins, str) and self.allowed_origins:
+            if self.allowed_origins == "*":
+                return ["*"]
             return [origin.strip() for origin in self.allowed_origins.split(",")]
-        return ["http://localhost:5173", "http://127.0.0.1:5173"]
+        return ["*"]
 
     class Config:
         env_file = ".env"
