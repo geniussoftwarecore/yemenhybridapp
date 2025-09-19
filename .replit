@@ -24,7 +24,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && python -m app.main"
+args = "cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
