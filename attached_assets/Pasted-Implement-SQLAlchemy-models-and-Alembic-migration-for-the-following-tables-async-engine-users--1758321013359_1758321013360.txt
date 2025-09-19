@@ -1,0 +1,29 @@
+Implement SQLAlchemy models and Alembic migration for the following tables (async engine):
+
+users(id, full_name, email unique, phone, role[engineer|sales|admin], password_hash, is_active bool default true, created_at)
+customers(id, name, phone, email, address, created_at)
+vehicles(id, customer_id FK, plate_no, make, model, year int, vin, odometer int, hybrid_type, color)
+work_orders(id, customer_id FK, vehicle_id FK, status enum[new|awaiting_approval|ready_to_start|in_progress|done|closed],
+            complaint, est_parts numeric(12,2), est_labor numeric(12,2), est_total numeric(12,2),
+            final_cost numeric(12,2), warranty_text, notes,
+            scheduled_at, started_at, completed_at, created_by FK users)
+work_order_items(id, work_order_id FK, item_type enum[part|labor], name, qty numeric(10,2), unit_price numeric(12,2))
+media(id, work_order_id FK, phase enum[before|during|after], path, mime, note, created_at)
+services(id, name, category, base_price numeric(12,2), est_minutes int, description, is_active bool default true)
+work_order_services(id, work_order_id FK, service_id FK)
+parts(id, name, part_no, supplier, stock int, min_stock int, buy_price numeric(12,2), sell_price numeric(12,2), location)
+invoices(id, work_order_id FK, subtotal numeric, tax numeric, discount numeric, total numeric, paid numeric, method, pdf_path, created_at)
+payments(id, invoice_id FK, amount numeric, method, ref, paid_at)
+bookings(id, customer_id FK, vehicle_id FK, service_id FK, booking_type, channel, status, requested_at, confirmed_at, cancelled_at, notes)
+audit_logs(id, actor_id FK users, action, entity, entity_id, at, attachment_url)
+
+Add indexes (e.g., vehicles.plate_no, vehicles.vin, work_orders.status).
+Use ondelete=cascade where appropriate.
+
+Run alembic revision --autogenerate and upgrade head.
+
+Seed minimal dev data:
+- users: admin (role=admin), sales (role=sales), engineer (role=engineer) with bcrypt hashed passwords (e.g., "Passw0rd!")
+- one customer, one vehicle linked to that customer.
+
+Print DONE:STAGE-2.
