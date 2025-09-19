@@ -13,7 +13,7 @@ from .db.session import engine
 from .db.base import Base
 
 # Import all routers
-from .api import auth, customers, vehicles, workorders, media, invoices, reports, notifications, approvals
+from .api import auth, customers, vehicles, services, parts, workorders, media, invoices, reports, notifications, approvals
 
 # Configure logging
 logging.basicConfig(
@@ -111,6 +111,8 @@ if os.path.exists(settings.storage_dir):
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(customers.router, prefix="/api/v1")
 app.include_router(vehicles.router, prefix="/api/v1")
+app.include_router(services.router, prefix="/api/v1")
+app.include_router(parts.router, prefix="/api/v1")
 app.include_router(workorders.router, prefix="/api/v1")
 app.include_router(media.router, prefix="/api/v1")
 app.include_router(invoices.router, prefix="/api/v1")
