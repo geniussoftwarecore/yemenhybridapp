@@ -1,24 +1,25 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..core.deps import get_db, get_current_user
+from ..core.deps import get_db, get_current_user, require_roles
+from ..db.models import User, UserRole
 
 router = APIRouter(prefix="/workorders", tags=["Work Orders"])
 
 @router.get("/")
 async def get_workorders(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get all work orders."""
+    """Get all work orders. All authenticated users."""
     # TODO: Implement work order listing
     return {"message": "Get work orders endpoint - to be implemented"}
 
 @router.post("/")
 async def create_workorder(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Create new work order."""
+    """Create new work order. All authenticated users."""
     # TODO: Implement work order creation
     return {"message": "Create work order endpoint - to be implemented"}
 
@@ -35,19 +36,19 @@ async def get_workorder(
 @router.put("/{workorder_id}")
 async def update_workorder(
     workorder_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Update work order."""
+    """Update work order. All authenticated users can update work orders."""
     # TODO: Implement work order update
     return {"message": f"Update work order {workorder_id} endpoint - to be implemented"}
 
 @router.delete("/{workorder_id}")
 async def delete_workorder(
     workorder_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(require_roles(UserRole.admin)),
     db: AsyncSession = Depends(get_db)
 ):
-    """Delete work order."""
+    """Delete work order. Admin only."""
     # TODO: Implement work order deletion
     return {"message": f"Delete work order {workorder_id} endpoint - to be implemented"}

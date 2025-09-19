@@ -8,9 +8,9 @@ from ..base import Base
 
 class UserRole(str, enum.Enum):
     """User role enum."""
-    ENGINEER = "engineer"
-    SALES = "sales"
-    ADMIN = "admin"
+    engineer = "engineer"
+    sales = "sales"
+    admin = "admin"
 
 
 class User(Base):
@@ -21,7 +21,7 @@ class User(Base):
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False, index=True)
     phone = Column(String)
-    role = Column(Enum(UserRole), nullable=False)
+    role = Column(Enum(UserRole, name="userrole", native_enum=True, validate_strings=True), nullable=False)
     password_hash = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
