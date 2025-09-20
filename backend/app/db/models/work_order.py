@@ -51,6 +51,7 @@ class WorkOrder(Base):
     media = relationship("Media", back_populates="work_order", cascade="all, delete-orphan")
     services = relationship("WorkOrderService", back_populates="work_order", cascade="all, delete-orphan")
     invoice = relationship("Invoice", back_populates="work_order", uselist=False)
+    approval_requests = relationship("ApprovalRequest", back_populates="work_order", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index('ix_work_orders_status', 'status'),

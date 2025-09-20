@@ -1,7 +1,8 @@
 import os
 import time
 import uuid
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Optional
 
@@ -17,6 +18,7 @@ from ..core.config import settings
 from ..db.models import User, UserRole, Customer, Vehicle
 from ..db.models.work_order import WorkOrder, WorkOrderStatus, WorkOrderItem, ItemType
 from ..db.models.media import Media, MediaPhase
+from ..db.models.approval_request import ApprovalRequest, ApprovalChannel
 from ..db.schemas import (
     WorkOrderCreate,
     WorkOrderUpdate, 
@@ -26,7 +28,9 @@ from ..db.schemas import (
     WorkOrderSchedule,
     WorkOrderItemCreate,
     WorkOrderItemResponse,
-    MediaUploadResponse
+    MediaUploadResponse,
+    ApprovalRequestCreate,
+    ApprovalRequestResponse
 )
 from ..services.audit import log_action
 
@@ -540,6 +544,79 @@ async def update_workorder(
     await db.refresh(workorder)
     
     return workorder
+
+@router.post("/{workorder_id}/request-approval", response_model=WorkOrderResponse)
+async def request_workorder_approval(
+    workorder_id: int,
+    current_user: User = Depends(require_roles(UserRole.engineer)),
+    db: AsyncSession = Depends(get_db)
+):
+    """Engineer request approval for work order (change status to awaiting_approval)."""
+    # Get work order
+    query = select(WorkOrder).where(WorkOrder.id == workorder_id)
+    result = await db.execute(query)
+    workorder = result.scalar_one_or_none()
+    
+    if not workorder:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Work order not found"
+        )
+    
+    # Update status to awaiting approval
+    workorder.status = WorkOrderStatus.AWAITING_APPROVAL
+    
+    # Log audit entry
+    await log_action(
+        db, current_user, "REQUEST_APPROVAL", "work_order", workorder.id
+    )
+    
+    await db.commit()
+    await db.refresh(workorder)
+    
+    return workorder
+
+@router.post("/{workorder_id}/send-to-customer", response_model=ApprovalRequestResponse, status_code=status.HTTP_201_CREATED)
+async def send_approval_to_customer(
+    workorder_id: int,
+    approval_data: ApprovalRequestCreate,
+    current_user: User = Depends(require_roles(UserRole.sales, UserRole.admin)),
+    db: AsyncSession = Depends(get_db)
+):
+    """Send approval request to customer (sales/admin only). Creates approval token and record."""
+    # Verify work order exists
+    workorder_query = select(WorkOrder).where(WorkOrder.id == workorder_id)
+    workorder_result = await db.execute(workorder_query)
+    workorder = workorder_result.scalar_one_or_none()
+    
+    if not workorder:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Work order not found"
+        )
+    
+    # Generate secure token (24 hour expiry)
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    
+    # Create approval request
+    approval_request = ApprovalRequest(
+        work_order_id=workorder_id,
+        token=token,
+        expires_at=expires_at,
+        sent_via=approval_data.sent_via
+    )
+    db.add(approval_request)
+    
+    # Log audit entry
+    await log_action(
+        db, current_user, f"SEND_APPROVAL_{approval_data.sent_via.value.upper()}", "work_order", workorder_id
+    )
+    
+    await db.commit()
+    await db.refresh(approval_request)
+    
+    return approval_request
 
 @router.delete("/{workorder_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_workorder(

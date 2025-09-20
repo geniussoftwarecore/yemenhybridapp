@@ -8,6 +8,7 @@ from .service import Service, Part
 from .invoice import Invoice, Payment
 from .booking import Booking
 from .audit_log import AuditLog
+from .approval_request import ApprovalRequest, ApprovalChannel
 
 __all__ = [
     "User", "UserRole",
@@ -18,5 +19,6 @@ __all__ = [
     "Service", "Part",
     "Invoice", "Payment",
     "Booking",
-    "AuditLog"
+    "AuditLog",
+    "ApprovalRequest", "ApprovalChannel"
 ]

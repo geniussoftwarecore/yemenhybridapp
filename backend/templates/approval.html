@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Order Approval - Yemen Hybrid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+        }
+        .company-name {
+            color: #007bff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .work-order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .value {
+            color: #666;
+        }
+        .estimate-section {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .photos-section {
+            margin: 20px 0;
+        }
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .photo {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .photo img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-approve:hover {
+            background-color: #218838;
+        }
+        .btn-reject {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-reject:hover {
+            background-color: #c82333;
+        }
+        .reason-section {
+            display: none;
+            margin-top: 15px;
+        }
+        .reason-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .expired {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .total-estimate {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-name">Yemen Hybrid Service Center</div>
+            <div>Work Order Approval Request</div>
+        </div>
+
+        {% if is_expired %}
+        <div class="expired">
+            This approval request has expired. Please contact us for a new approval link.
+        </div>
+        {% endif %}
+
+        <div class="work-order-info">
+            <h3>Service Details</h3>
+            <div class="info-row">
+                <span class="label">Customer:</span>
+                <span class="value">{{ approval.customer_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Vehicle:</span>
+                <span class="value">{{ approval.vehicle_info }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Work Order #:</span>
+                <span class="value">{{ approval.work_order_id }}</span>
+            </div>
+            {% if approval.complaint %}
+            <div class="info-row">
+                <span class="label">Issue Description:</span>
+                <span class="value">{{ approval.complaint }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="estimate-section">
+            <h3>Service Estimate</h3>
+            <div class="info-row">
+                <span class="label">Parts:</span>
+                <span class="value">{{ approval.est_parts }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Labor:</span>
+                <span class="value">{{ approval.est_labor }}</span>
+            </div>
+            <div class="total-estimate">
+                Total Estimate: {{ approval.est_total }}
+            </div>
+        </div>
+
+        {% if approval.before_photos %}
+        <div class="photos-section">
+            <h3>Diagnostic Photos</h3>
+            <div class="photos-grid">
+                {% for photo in approval.before_photos %}
+                <div class="photo">
+                    <img src="{{ photo }}" alt="Diagnostic photo" loading="lazy">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not is_expired %}
+        <form method="post" id="approvalForm">
+            <div class="actions">
+                <button type="button" class="btn btn-approve" onclick="approve()">
+                    ✓ Approve Service
+                </button>
+                <button type="button" class="btn btn-reject" onclick="showRejectReason()">
+                    ✗ Decline Service
+                </button>
+            </div>
+            
+            <div id="reasonSection" class="reason-section">
+                <textarea name="reason" class="reason-input" placeholder="Please tell us why you're declining (optional)" rows="3"></textarea>
+                <button type="button" class="btn btn-reject" onclick="reject()">
+                    Submit Decline
+                </button>
+            </div>
+            
+            <input type="hidden" name="decision" id="decision">
+        </form>
+        {% endif %}
+    </div>
+
+    <script>
+        function approve() {
+            if (confirm('Are you sure you want to approve this service estimate?')) {
+                document.getElementById('decision').value = 'approve';
+                document.getElementById('approvalForm').submit();
+            }
+        }
+
+        function showRejectReason() {
+            document.getElementById('reasonSection').style.display = 'block';
+            document.querySelector('.actions').style.display = 'none';
+        }
+
+        function reject() {
+            if (confirm('Are you sure you want to decline this service?')) {
+                document.getElementById('decision').value = 'reject';
+                document.getElementById('approvalForm').submit();
+            }
+        }
+    </script>
+</body>
+</html>

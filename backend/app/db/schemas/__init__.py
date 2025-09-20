@@ -9,6 +9,9 @@ from .workorders import (
     WorkOrderEstimate, WorkOrderSchedule, WorkOrderItemCreate, WorkOrderItemResponse,
     MediaUploadResponse, AuditLogResponse
 )
+from .approvals import (
+    ApprovalRequestCreate, ApprovalRequestResponse, PublicApprovalResponse, ApprovalDecision
+)
 
 __all__ = [
     "LoginRequest", "LoginResponse", "UserResponse",
@@ -18,5 +21,6 @@ __all__ = [
     "PartCreate", "PartUpdate", "PartResponse", "PartListResponse", "PartStockAdjustment",
     "WorkOrderCreate", "WorkOrderUpdate", "WorkOrderResponse", "WorkOrderListResponse",
     "WorkOrderEstimate", "WorkOrderSchedule", "WorkOrderItemCreate", "WorkOrderItemResponse",
-    "MediaUploadResponse", "AuditLogResponse"
+    "MediaUploadResponse", "AuditLogResponse",
+    "ApprovalRequestCreate", "ApprovalRequestResponse", "PublicApprovalResponse", "ApprovalDecision"
 ]

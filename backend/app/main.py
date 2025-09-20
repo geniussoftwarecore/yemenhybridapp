@@ -13,7 +13,7 @@ from .db.session import engine
 from .db.base import Base
 
 # Import all routers
-from .api import auth, customers, vehicles, services, parts, workorders, media, invoices, reports, notifications, approvals
+from .api import auth, customers, vehicles, services, parts, workorders, media, invoices, reports, notifications, approvals, public
 
 # Configure logging
 logging.basicConfig(
@@ -115,6 +115,7 @@ app.include_router(invoices.router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
 app.include_router(approvals.router, prefix="/api/v1")
+app.include_router(public.router)  # No prefix for public endpoints
 
 # Global exception handler
 @app.exception_handler(Exception)
