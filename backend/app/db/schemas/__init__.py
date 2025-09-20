@@ -4,11 +4,19 @@ from .customers import CustomerCreate, CustomerUpdate, CustomerResponse, Custome
 from .vehicles import VehicleCreate, VehicleUpdate, VehicleResponse, VehicleListResponse
 from .services import ServiceCreate, ServiceUpdate, ServiceResponse, ServiceListResponse
 from .parts import PartCreate, PartUpdate, PartResponse, PartListResponse, PartStockAdjustment
+from .workorders import (
+    WorkOrderCreate, WorkOrderUpdate, WorkOrderResponse, WorkOrderListResponse,
+    WorkOrderEstimate, WorkOrderSchedule, WorkOrderItemCreate, WorkOrderItemResponse,
+    MediaUploadResponse, AuditLogResponse
+)
 
 __all__ = [
     "LoginRequest", "LoginResponse", "UserResponse",
     "CustomerCreate", "CustomerUpdate", "CustomerResponse", "CustomerListResponse",
     "VehicleCreate", "VehicleUpdate", "VehicleResponse", "VehicleListResponse", 
     "ServiceCreate", "ServiceUpdate", "ServiceResponse", "ServiceListResponse",
-    "PartCreate", "PartUpdate", "PartResponse", "PartListResponse", "PartStockAdjustment"
+    "PartCreate", "PartUpdate", "PartResponse", "PartListResponse", "PartStockAdjustment",
+    "WorkOrderCreate", "WorkOrderUpdate", "WorkOrderResponse", "WorkOrderListResponse",
+    "WorkOrderEstimate", "WorkOrderSchedule", "WorkOrderItemCreate", "WorkOrderItemResponse",
+    "MediaUploadResponse", "AuditLogResponse"
 ]
