@@ -29,10 +29,6 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting FastAPI application")
     
-    # Create database tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    
     # Create storage directory
     os.makedirs(settings.storage_dir, exist_ok=True)
     
