@@ -371,7 +371,7 @@ async def add_workorder_item(
     
     # Log audit entry
     await log_action(
-        db, current_user, f"ADD_{item_data.item_type.upper()}_ITEM", "work_order", workorder_id
+        db, current_user, f"ADD_{item_data.item_type.value.upper()}_ITEM", "work_order", workorder_id
     )
     
     await db.commit()
@@ -399,7 +399,7 @@ async def delete_workorder_item(
     
     # Log audit entry
     await log_action(
-        db, current_user, f"DELETE_{item.item_type.upper()}_ITEM", "work_order", item.work_order_id
+        db, current_user, f"DELETE_{item.item_type.value.upper()}_ITEM", "work_order", item.work_order_id
     )
     
     # Delete item
