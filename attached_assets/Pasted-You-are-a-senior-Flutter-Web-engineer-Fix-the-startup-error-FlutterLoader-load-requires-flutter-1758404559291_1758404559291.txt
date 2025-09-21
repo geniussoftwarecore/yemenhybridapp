@@ -1,0 +1,79 @@
+You are a senior Flutter Web engineer. Fix the startup error:
+“FlutterLoader.load requires _flutter.buildConfig to be set”.
+
+Tasks (apply exactly, idempotent):
+
+1) Overwrite /frontend/web/index.html with a canonical Flutter Web template
+   compatible with Flutter 3.16+ that uses loader.loadEntrypoint(), sets base href,
+   disables service worker (for now), and prefers HTML renderer.
+
+----- BEGIN: /frontend/web/index.html -----
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>Yemen Hybrid</title>
+
+    <!-- Correct base href for Flutter web routing -->
+    <base href="/" />
+
+    <!-- Prefer HTML renderer in constrained environments like Replit -->
+    <meta name="renderer" content="html" />
+
+    <!-- Prevent stale SW during dev -->
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <!-- DO NOT register a service worker in dev -->
+    <script>
+      // In dev we keep serviceWorkerVersion = null to avoid registration.
+      const serviceWorkerVersion = null;
+    </script>
+
+    <!-- Flutter loader -->
+    <script src="flutter.js" defer></script>
+  </head>
+
+  <body>
+    <script>
+      // Bootstrap Flutter Web correctly; do NOT call FlutterLoader.load() directly.
+      window.addEventListener('load', function () {
+        // Ensure global _flutter exists from flutter.js
+        if (!window._flutter || !window._flutter.loader) {
+          console.error('flutter.js not loaded');
+          return;
+        }
+
+        window._flutter.loader.loadEntrypoint({
+          entrypointUrl: 'main.dart.js',              // explicit entrypoint
+          serviceWorker: { serviceWorkerVersion },    // disabled in dev
+          onEntrypointLoaded: function (engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'html'                        // prefer HTML renderer
+            }).then(function (appRunner) {
+              appRunner.runApp();
+            });
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
+----- END: /frontend/web/index.html -----
+
+2) Ensure no other script registers a service worker (remove any flutter_service_worker.js registration or custom SW code in this project).
+
+3) Clean & rebuild Flutter Web with HTML renderer:
+   - run: (from /frontend)
+     flutter clean
+     flutter pub get
+     flutter run -d chrome --web-renderer html
+
+4) Print to console:
+   - “FIXED index.html bootstrap; using loadEntrypoint + HTML renderer”
+   - “DONE:FIX-FLUTTER-BOOTSTRAP”

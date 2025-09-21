@@ -1,77 +1,56 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>Yemen Hybrid</title>
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+    <!-- Correct base href for Flutter web routing -->
+    <base href="/" />
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+    <!-- Prefer HTML renderer in constrained environments like Replit -->
+    <meta name="renderer" content="html" />
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="/">
+    <!-- Prevent stale SW during dev -->
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Yemen Hybrid Flutter App">
+    <!-- DO NOT register a service worker in dev -->
+    <script>
+      // In dev we keep serviceWorkerVersion = null to avoid registration.
+      const serviceWorkerVersion = null;
+    </script>
 
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="flutter_app">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- Flutter loader -->
+    <script src="flutter.js" defer></script>
+  </head>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>Yemen Hybrid App</title>
-  <link rel="manifest" href="manifest.json">
-
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = "{{flutter_service_worker_version}}";
-  </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
-</head>
-<body>
-  <div id="loading">
-    <style>
-      body {
-        margin: 0;
-        background-color: #1976d2;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: 'Roboto', sans-serif;
-      }
-      #loading {
-        color: white;
-        font-size: 18px;
-      }
-    </style>
-    Loading...
-  </div>
-  <script>
-    window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.load({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
+  <body>
+    <script>
+      // Bootstrap Flutter Web correctly; do NOT call FlutterLoader.load() directly.
+      window.addEventListener('load', function () {
+        // Ensure global _flutter exists from flutter.js
+        if (!window._flutter || !window._flutter.loader) {
+          console.error('flutter.js not loaded');
+          return;
         }
+
+        window._flutter.loader.loadEntrypoint({
+          entrypointUrl: 'main.dart.js',              // explicit entrypoint
+          serviceWorker: { serviceWorkerVersion },    // disabled in dev
+          onEntrypointLoaded: function (engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'html'                        // prefer HTML renderer
+            }).then(function (appRunner) {
+              appRunner.runApp();
+            });
+          },
+        });
       });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
