@@ -1,4 +1,4 @@
-modules = ["python-3.11", "web", "dart-3.8"]
+modules = ["python-3.11", "web"]
 [agent]
 expertMode = true
 
