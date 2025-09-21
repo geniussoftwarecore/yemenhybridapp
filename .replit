@@ -1,10 +1,10 @@
-modules = ["python-3.11", "web"]
+modules = ["python-3.11", "web", "dart-3.8"]
 [agent]
 expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["freetype", "glibcLocales", "libxcrypt", "postgresql"]
+packages = ["freetype", "glibcLocales", "libxcrypt", "postgresql", "flutter"]
 
 [workflows]
 runButton = "Project"
