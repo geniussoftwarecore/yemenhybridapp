@@ -17,7 +17,7 @@ class HttpClient {
   HttpClient() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: '${Env.apiBaseUrl}/api/v1',
+        baseUrl: Env.apiBaseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
