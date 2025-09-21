@@ -89,7 +89,9 @@ Preferred communication style: Simple, everyday language.
 - **Environment Configuration**: Confirmed CORS settings work with Replit's proxy environment (`allow_origins=["*"]`)
 - **Database URL**: Configured to use environment variable `DATABASE_URL` for PostgreSQL connectivity
 - **Deployment Configuration**: Set up autoscale deployment target for production with proper uvicorn command
-- **Workflow**: FastAPI server workflow running successfully on port 5000 with host 0.0.0.0
+- **Workflows**: 
+  - FastAPI server workflow running successfully on port 8000 with host 0.0.0.0
+  - Flutter Web frontend running successfully on port 5000 with host 0.0.0.0
 - **API Status**: All endpoints functional and accessible through Replit domain
 - **Documentation**: Swagger UI available at `/docs` endpoint with full OpenAPI schema
 - **Health Check**: Confirmed `/health` endpoint returns `{"ok":true}`
@@ -99,7 +101,8 @@ Preferred communication style: Simple, everyday language.
 ## Project Status
 
 **Current State**: ✅ Fully operational in Replit environment
-- **API Server**: Running on port 5000 with FastAPI
+- **API Server**: Running on port 8000 with FastAPI
+- **Frontend**: Flutter Web running on port 5000
 - **Database**: PostgreSQL with all migrations applied
 - **Documentation**: Available at `/docs` endpoint
 - **Health Check**: Available at `/health` endpoint
