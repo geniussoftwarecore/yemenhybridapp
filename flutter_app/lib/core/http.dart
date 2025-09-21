@@ -3,18 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'env.dart';
+import 'services/toast_service.dart';
 
 // HTTP client provider
 final httpClientProvider = Provider<HttpClient>((ref) {
-  return HttpClient();
+  final toastService = ref.read(toastServiceProvider);
+  return HttpClient(toastService);
 });
 
 class HttpClient {
   late final Dio _dio;
   static const String _tokenKey = 'auth_token';
+  final ToastService _toastService;
 
-  HttpClient() {
+  HttpClient(this._toastService) {
     _dio = Dio(
       BaseOptions(
         baseUrl: Env.apiBaseUrl,
@@ -46,7 +50,7 @@ class HttpClient {
           // Handle 401 Unauthorized - logout user
           if (error.response?.statusCode == 401) {
             await _clearToken();
-            _showLogoutMessage();
+            _handleLogout();
           }
           handler.next(error);
         },
@@ -89,9 +93,20 @@ class HttpClient {
     return token != null && token.isNotEmpty;
   }
 
-  void _showLogoutMessage() {
-    // Note: In a real app, you'd want to use a global navigator key or context
-    debugPrint('User logged out due to 401 error');
+  void _handleLogout() {
+    // Clear any existing messages
+    _toastService.clearSnackBars();
+    
+    // Show logout message
+    _toastService.showError('Session expired. Please login again.');
+    
+    // Navigate to login screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = ToastService.scaffoldMessengerKey.currentContext;
+      if (context != null && context.mounted) {
+        context.go('/login');
+      }
+    });
   }
 
   // HTTP methods

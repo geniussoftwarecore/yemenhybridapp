@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/http.dart';
+import '../../../core/models/api_response.dart';
 import '../models/booking.dart';
 
 final bookingApiServiceProvider = Provider<BookingApiService>((ref) {
@@ -11,18 +12,19 @@ class BookingApiService {
 
   BookingApiService(this._httpClient);
 
-  Future<List<Booking>> getBookings({
-    int? page,
-    int? limit,
+  Future<BookingListResponse> getBookings({
+    int page = 1,
+    int size = 10,
     String? status,
     String? channel,
     DateTime? startDate,
     DateTime? endDate,
     int? customerId,
   }) async {
-    final queryParams = <String, dynamic>{};
-    if (page != null) queryParams['page'] = page;
-    if (limit != null) queryParams['limit'] = limit;
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
+    };
     if (status != null) queryParams['status'] = status;
     if (channel != null) queryParams['channel'] = channel;
     if (customerId != null) queryParams['customer_id'] = customerId;
@@ -34,9 +36,7 @@ class BookingApiService {
       queryParameters: queryParams,
     );
 
-    return (response.data as List)
-        .map((json) => Booking.fromJson(json))
-        .toList();
+    return BookingListResponse.fromJson(response.data);
   }
 
   Future<Booking> getBooking(int id) async {

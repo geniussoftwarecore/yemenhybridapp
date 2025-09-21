@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/http.dart';
+import '../../../core/models/api_response.dart';
 import '../models/workorder.dart';
 
 final workOrderApiServiceProvider = Provider<WorkOrderApiService>((ref) {
@@ -13,28 +14,27 @@ class WorkOrderApiService {
 
   WorkOrderApiService(this._httpClient);
 
-  Future<List<WorkOrder>> getWorkOrders({
-    int? page,
-    int? limit,
+  Future<WorkOrderListResponse> getWorkOrders({
+    int page = 1,
+    int size = 10,
     String? status,
     int? customerId,
-    int? assignedTo,
+    int? vehicleId,
   }) async {
-    final queryParams = <String, dynamic>{};
-    if (page != null) queryParams['page'] = page;
-    if (limit != null) queryParams['limit'] = limit;
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
+    };
     if (status != null) queryParams['status'] = status;
     if (customerId != null) queryParams['customer_id'] = customerId;
-    if (assignedTo != null) queryParams['assigned_to'] = assignedTo;
+    if (vehicleId != null) queryParams['vehicle_id'] = vehicleId;
     
     final response = await _httpClient.get(
       '/api/v1/workorders',
       queryParameters: queryParams,
     );
 
-    return (response.data as List)
-        .map((json) => WorkOrder.fromJson(json))
-        .toList();
+    return WorkOrderListResponse.fromJson(response.data);
   }
 
   Future<WorkOrder> getWorkOrder(int id) async {
@@ -62,45 +62,51 @@ class WorkOrderApiService {
     await _httpClient.delete('/api/v1/workorders/$id');
   }
 
-  Future<WorkOrder> updateStatus(int id, WorkOrderStatus status) async {
-    final response = await _httpClient.put(
-      '/api/v1/workorders/$id/status',
-      data: {'status': status.backendValue},
+  Future<WorkOrder> setEstimate(int id, {
+    double? estParts,
+    double? estLabor,
+  }) async {
+    final response = await _httpClient.patch(
+      '/api/v1/workorders/$id/estimate',
+      data: {
+        if (estParts != null) 'est_parts': estParts,
+        if (estLabor != null) 'est_labor': estLabor,
+      },
     );
     return WorkOrder.fromJson(response.data);
   }
 
   Future<WorkOrder> startWorkOrder(int id) async {
-    final response = await _httpClient.post('/api/v1/workorders/$id/start');
+    final response = await _httpClient.patch('/api/v1/workorders/$id/start');
     return WorkOrder.fromJson(response.data);
   }
 
-  Future<WorkOrder> completeWorkOrder(int id) async {
-    final response = await _httpClient.post('/api/v1/workorders/$id/complete');
+  Future<WorkOrder> finishWorkOrder(int id) async {
+    final response = await _httpClient.patch('/api/v1/workorders/$id/finish');
     return WorkOrder.fromJson(response.data);
   }
 
-  Future<void> requestApproval(int id, {String? notes}) async {
-    await _httpClient.post(
-      '/api/v1/workorders/$id/request-approval',
-      data: {'notes': notes},
-    );
+  Future<WorkOrder> closeWorkOrder(int id) async {
+    final response = await _httpClient.patch('/api/v1/workorders/$id/close');
+    return WorkOrder.fromJson(response.data);
   }
 
-  Future<String> sendToCustomer(int id, {
-    String? channel = 'email',
-    String? message,
+  Future<WorkOrder> requestApproval(int id) async {
+    final response = await _httpClient.post('/api/v1/workorders/$id/request-approval');
+    return WorkOrder.fromJson(response.data);
+  }
+
+  Future<ApprovalRequestResponse> sendToCustomer(int id, {
+    String channel = 'email',
   }) async {
     final response = await _httpClient.post(
       '/api/v1/workorders/$id/send-to-customer',
       data: {
-        'channel': channel,
-        'message': message,
+        'sent_via': channel,
       },
     );
     
-    // Return the approval link for development console logging
-    return response.data['approval_link'] ?? '';
+    return ApprovalRequestResponse.fromJson(response.data);
   }
 
   Future<String> getPublicApprovalLink(int id) async {
@@ -109,17 +115,17 @@ class WorkOrderApiService {
   }
 
   // Media upload functionality
-  Future<WorkOrderMedia> uploadMedia(
+  Future<MediaUploadResponse> uploadMedia(
     int workOrderId,
     String filePath,
-    MediaType type, {
-    String? description,
+    String phase, {
+    String? note,
   }) async {
+    final fileName = filePath.split('/').last;
     final formData = FormData.fromMap({
-      'work_order_id': workOrderId,
-      'type': type.backendValue,
-      'description': description ?? '',
-      'file': await MultipartFile.fromFile(filePath),
+      'phase': phase, // before, during, after
+      'note': note ?? '',
+      'file': await MultipartFile.fromFile(filePath, filename: fileName),
     });
 
     final response = await _httpClient.post(
@@ -127,58 +133,68 @@ class WorkOrderApiService {
       data: formData,
     );
 
-    return WorkOrderMedia.fromJson(response.data);
+    return MediaUploadResponse.fromJson(response.data);
   }
 
-  Future<List<WorkOrderMedia>> getWorkOrderMedia(int workOrderId) async {
-    final response = await _httpClient.get('/api/v1/workorders/$workOrderId/media');
+  Future<List<MediaUploadResponse>> getWorkOrderMedia(int workOrderId, {String? phase}) async {
+    final queryParams = <String, dynamic>{};
+    if (phase != null) queryParams['phase'] = phase;
     
-    return (response.data as List)
-        .map((json) => WorkOrderMedia.fromJson(json))
-        .toList();
-  }
-
-  Future<List<WorkOrderMedia>> getMediaByType(int workOrderId, MediaType type) async {
     final response = await _httpClient.get(
       '/api/v1/workorders/$workOrderId/media',
-      queryParameters: {'type': type.backendValue},
+      queryParameters: queryParams,
     );
     
     return (response.data as List)
-        .map((json) => WorkOrderMedia.fromJson(json))
+        .map((json) => MediaUploadResponse.fromJson(json))
         .toList();
   }
 
-  Future<void> deleteMedia(int workOrderId, int mediaId) async {
-    await _httpClient.delete('/api/v1/workorders/$workOrderId/media/$mediaId');
+  Future<List<MediaUploadResponse>> getBeforeGallery(int workOrderId) async {
+    return getWorkOrderMedia(workOrderId, phase: 'before');
   }
 
-  // Services management
-  Future<WorkOrder> addService(int workOrderId, WorkOrderService service) async {
+  Future<List<MediaUploadResponse>> getDuringGallery(int workOrderId) async {
+    return getWorkOrderMedia(workOrderId, phase: 'during');
+  }
+
+  Future<List<MediaUploadResponse>> getAfterGallery(int workOrderId) async {
+    return getWorkOrderMedia(workOrderId, phase: 'after');
+  }
+
+  Future<void> deleteMedia(int mediaId) async {
+    await _httpClient.delete('/api/v1/media/$mediaId');
+  }
+
+  // Work Order Items (Services/Parts) management
+  Future<WorkOrderItemResponse> addItem(int workOrderId, {
+    required String itemType, // 'service' or 'part'
+    required String name,
+    required double price,
+    int quantity = 1,
+    String? description,
+  }) async {
     final response = await _httpClient.post(
-      '/api/v1/workorders/$workOrderId/services',
-      data: service.toJson(),
+      '/api/v1/workorders/$workOrderId/items',
+      data: {
+        'item_type': itemType,
+        'name': name,
+        'price': price,
+        'quantity': quantity,
+        'description': description,
+      },
     );
-    return WorkOrder.fromJson(response.data);
+    return WorkOrderItemResponse.fromJson(response.data);
   }
 
-  Future<WorkOrder> updateService(
-    int workOrderId,
-    int serviceId,
-    WorkOrderService service,
-  ) async {
-    final response = await _httpClient.put(
-      '/api/v1/workorders/$workOrderId/services/$serviceId',
-      data: service.toJson(),
-    );
-    return WorkOrder.fromJson(response.data);
+  Future<void> deleteItem(int itemId) async {
+    await _httpClient.delete('/api/v1/workorders/items/$itemId');
   }
 
-  Future<WorkOrder> removeService(int workOrderId, int serviceId) async {
-    final response = await _httpClient.delete(
-      '/api/v1/workorders/$workOrderId/services/$serviceId',
-    );
-    return WorkOrder.fromJson(response.data);
+  Future<String> getPublicApprovalUrl(String token) async {
+    // Generate the public approval URL
+    final response = await _httpClient.get('/api/v1/public/approval/$token');
+    return response.data['url'] ?? '';
   }
 
   // Search and filtering

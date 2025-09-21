@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/http.dart';
+import '../../../core/models/api_response.dart';
 import '../models/customer.dart';
 
 final customerApiServiceProvider = Provider<CustomerApiService>((ref) {
@@ -11,17 +12,25 @@ class CustomerApiService {
 
   CustomerApiService(this._httpClient);
 
-  Future<List<Customer>> getCustomers({CustomerSearchFilters? filters}) async {
-    final queryParams = filters?.toQueryParameters() ?? {};
+  Future<CustomerListResponse> getCustomers({
+    int page = 1,
+    int size = 10,
+    String? search,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
+    };
+    if (search != null && search.isNotEmpty) {
+      queryParams['q'] = search;
+    }
     
     final response = await _httpClient.get(
       '/api/v1/customers',
       queryParameters: queryParams,
     );
 
-    return (response.data as List)
-        .map((json) => Customer.fromJson(json))
-        .toList();
+    return CustomerListResponse.fromJson(response.data);
   }
 
   Future<Customer> getCustomer(int id) async {
@@ -49,15 +58,8 @@ class CustomerApiService {
     await _httpClient.delete('/api/v1/customers/$id');
   }
 
-  Future<List<Customer>> searchCustomers(String query) async {
-    final response = await _httpClient.get(
-      '/api/v1/customers',
-      queryParameters: {'search': query},
-    );
-
-    return (response.data as List)
-        .map((json) => Customer.fromJson(json))
-        .toList();
+  Future<CustomerListResponse> searchCustomers(String query) async {
+    return getCustomers(search: query);
   }
 
   Future<List<Customer>> getCustomersByCity(String city) async {

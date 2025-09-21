@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/http.dart';
+import '../../../core/models/api_response.dart';
 import '../models/vehicle.dart';
 
 final vehicleApiServiceProvider = Provider<VehicleApiService>((ref) {
@@ -11,17 +12,29 @@ class VehicleApiService {
 
   VehicleApiService(this._httpClient);
 
-  Future<List<Vehicle>> getVehicles({VehicleSearchFilters? filters}) async {
-    final queryParams = filters?.toQueryParameters() ?? {};
+  Future<VehicleListResponse> getVehicles({
+    int page = 1,
+    int size = 10,
+    String? search,
+    int? customerId,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
+    };
+    if (search != null && search.isNotEmpty) {
+      queryParams['q'] = search;
+    }
+    if (customerId != null) {
+      queryParams['customer_id'] = customerId;
+    }
     
     final response = await _httpClient.get(
       '/api/v1/vehicles',
       queryParameters: queryParams,
     );
 
-    return (response.data as List)
-        .map((json) => Vehicle.fromJson(json))
-        .toList();
+    return VehicleListResponse.fromJson(response.data);
   }
 
   Future<Vehicle> getVehicle(int id) async {
@@ -60,26 +73,12 @@ class VehicleApiService {
         .toList();
   }
 
-  Future<List<Vehicle>> searchByPlate(String plate) async {
-    final response = await _httpClient.get(
-      '/api/v1/vehicles',
-      queryParameters: {'plate': plate},
-    );
-
-    return (response.data as List)
-        .map((json) => Vehicle.fromJson(json))
-        .toList();
+  Future<VehicleListResponse> searchByPlate(String plate) async {
+    return getVehicles(search: plate);
   }
 
-  Future<List<Vehicle>> searchByVin(String vin) async {
-    final response = await _httpClient.get(
-      '/api/v1/vehicles',
-      queryParameters: {'vin': vin},
-    );
-
-    return (response.data as List)
-        .map((json) => Vehicle.fromJson(json))
-        .toList();
+  Future<VehicleListResponse> searchByVin(String vin) async {
+    return getVehicles(search: vin);
   }
 
   Future<List<Vehicle>> getVehiclesByCustomer(int customerId) async {

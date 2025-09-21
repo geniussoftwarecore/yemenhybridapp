@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/http.dart';
+import '../../../core/models/api_response.dart';
 import '../models/invoice.dart';
 
 final invoiceApiServiceProvider = Provider<InvoiceApiService>((ref) {
@@ -12,15 +13,16 @@ class InvoiceApiService {
 
   InvoiceApiService(this._httpClient);
 
-  Future<List<Invoice>> getInvoices({
-    int? page,
-    int? limit,
+  Future<InvoiceListResponse> getInvoices({
+    int page = 1,
+    int size = 10,
     String? status,
     int? customerId,
   }) async {
-    final queryParams = <String, dynamic>{};
-    if (page != null) queryParams['page'] = page;
-    if (limit != null) queryParams['limit'] = limit;
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
+    };
     if (status != null) queryParams['status'] = status;
     if (customerId != null) queryParams['customer_id'] = customerId;
     
@@ -29,9 +31,7 @@ class InvoiceApiService {
       queryParameters: queryParams,
     );
 
-    return (response.data as List)
-        .map((json) => Invoice.fromJson(json))
-        .toList();
+    return InvoiceListResponse.fromJson(response.data);
   }
 
   Future<Invoice> getInvoice(int id) async {
@@ -85,7 +85,7 @@ class InvoiceApiService {
   }
 
   Future<String> generatePdf(int id) async {
-    final response = await _httpClient.post('/api/v1/invoices/$id/generate-pdf');
+    final response = await _httpClient.post('/api/v1/invoices/$id/pdf');
     return response.data['pdf_url'] ?? '';
   }
 
@@ -171,19 +171,8 @@ class InvoiceApiService {
         .toList();
   }
 
-  Future<List<Invoice>> getRecentInvoices({int limit = 10}) async {
-    final response = await _httpClient.get(
-      '/api/v1/invoices',
-      queryParameters: {
-        'limit': limit,
-        'sort': 'created_at',
-        'order': 'desc',
-      },
-    );
-
-    return (response.data as List)
-        .map((json) => Invoice.fromJson(json))
-        .toList();
+  Future<InvoiceListResponse> getRecentInvoices({int limit = 10}) async {
+    return getInvoices(size: limit);
   }
 
   Future<Map<String, dynamic>> getInvoiceStats() async {
