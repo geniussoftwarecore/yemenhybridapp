@@ -39,12 +39,10 @@
   "name": "الاسم",
   "phone": "الهاتف",
   "address": "العنوان",
-  "workOrderStatus": {
-    "new": "جديد",
-    "awaiting_approval": "في انتظار الموافقة",
-    "ready_to_start": "جاهز للبدء",
-    "in_progress": "قيد التنفيذ",
-    "done": "مكتمل",
-    "closed": "مغلق"
-  }
+  "workOrderStatusNew": "جديد",
+  "workOrderStatusAwaitingApproval": "في انتظار الموافقة",
+  "workOrderStatusReadyToStart": "جاهز للبدء",
+  "workOrderStatusInProgress": "قيد التنفيذ",
+  "workOrderStatusDone": "مكتمل",
+  "workOrderStatusClosed": "مغلق"
 }

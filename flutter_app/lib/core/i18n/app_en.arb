@@ -39,12 +39,10 @@
   "name": "Name",
   "phone": "Phone",
   "address": "Address",
-  "workOrderStatus": {
-    "new": "New",
-    "awaiting_approval": "Awaiting Approval",
-    "ready_to_start": "Ready to Start", 
-    "in_progress": "In Progress",
-    "done": "Done",
-    "closed": "Closed"
-  }
+  "workOrderStatusNew": "New",
+  "workOrderStatusAwaitingApproval": "Awaiting Approval",
+  "workOrderStatusReadyToStart": "Ready to Start",
+  "workOrderStatusInProgress": "In Progress",
+  "workOrderStatusDone": "Done",
+  "workOrderStatusClosed": "Closed"
 }
