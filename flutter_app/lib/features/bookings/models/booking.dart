@@ -1,3 +1,7 @@
+import '../customers/models/customer.dart';
+import '../vehicles/models/vehicle.dart';
+import '../workorders/models/workorder.dart';
+
 enum BookingChannel {
   whatsapp,
   email,
@@ -185,7 +189,3 @@ class Booking {
   }
 }
 
-// Import related models
-import '../customers/models/customer.dart';
-import '../vehicles/models/vehicle.dart';
-import '../workorders/models/workorder.dart';

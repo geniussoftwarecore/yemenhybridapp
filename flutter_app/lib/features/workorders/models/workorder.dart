@@ -1,3 +1,8 @@
+
+import '../customers/models/customer.dart';
+import '../vehicles/models/vehicle.dart';
+import '../auth/models/user.dart';
+
 enum WorkOrderStatus {
   pending,
   inProgress,
@@ -304,7 +309,3 @@ class WorkOrderMedia {
   }
 }
 
-// Import other models
-import '../customers/models/customer.dart';
-import '../vehicles/models/vehicle.dart';
-import '../auth/models/user.dart';

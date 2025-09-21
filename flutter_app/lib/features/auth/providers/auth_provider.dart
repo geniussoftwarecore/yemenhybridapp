@@ -32,7 +32,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _getCurrentUser() async {
     try {
-      final response = await _httpClient.get('/auth/me');
+      final response = await _httpClient.get('/api/v1/auth/me');
       final user = User.fromJson(response.data);
       state = state.copyWith(
         isAuthenticated: true,
@@ -55,7 +55,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await _httpClient.post('/auth/login', data: {
+      final response = await _httpClient.post('/api/v1/auth/login', data: {
         'email': email,
         'password': password,
       });

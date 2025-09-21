@@ -65,7 +65,7 @@ class VehicleApiService {
   Future<List<Vehicle>> searchVehicles(String query) async {
     final response = await _httpClient.get(
       '/api/v1/vehicles',
-      queryParameters: {'search': query},
+      queryParameters: {'q': query}, // Use 'q' to match backend
     );
 
     return (response.data as List)

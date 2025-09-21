@@ -110,6 +110,7 @@ class WorkOrderApiService {
   }
 
   Future<String> getPublicApprovalLink(int id) async {
+    // Note: This endpoint may not exist - get from send-to-customer response instead
     final response = await _httpClient.get('/api/v1/workorders/$id/approval-link');
     return response.data['link'] ?? '';
   }
@@ -201,7 +202,7 @@ class WorkOrderApiService {
   Future<List<WorkOrder>> searchWorkOrders(String query) async {
     final response = await _httpClient.get(
       '/api/v1/workorders',
-      queryParameters: {'search': query},
+      queryParameters: {'q': query}, // Use 'q' to match backend standard
     );
 
     return (response.data as List)

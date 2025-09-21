@@ -1,3 +1,6 @@
+import '../workorders/models/workorder.dart';
+import '../customers/models/customer.dart';
+
 enum InvoiceStatus {
   draft,
   sent,
@@ -178,6 +181,3 @@ class InvoiceItem {
   }
 }
 
-// Import related models
-import '../workorders/models/workorder.dart';
-import '../customers/models/customer.dart';

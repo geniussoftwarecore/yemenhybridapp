@@ -47,9 +47,12 @@ class InvoiceApiService {
     return Invoice.fromJson(response.data);
   }
 
+  // Note: This endpoint may not exist in backend - check before using
   Future<Invoice> createInvoiceFromWorkOrder(int workOrderId) async {
+    // Alternative: Create invoice with work_order_id in the data
     final response = await _httpClient.post(
-      '/api/v1/invoices/from-workorder/$workOrderId',
+      '/api/v1/invoices',
+      data: {'work_order_id': workOrderId},
     );
     return Invoice.fromJson(response.data);
   }
@@ -66,18 +69,21 @@ class InvoiceApiService {
     await _httpClient.delete('/api/v1/invoices/$id');
   }
 
+  // Note: Status update endpoint may not exist - use update invoice instead
   Future<Invoice> updateStatus(int id, InvoiceStatus status) async {
     final response = await _httpClient.put(
-      '/api/v1/invoices/$id/status',
+      '/api/v1/invoices/$id',
       data: {'status': status.backendValue},
     );
     return Invoice.fromJson(response.data);
   }
 
+  // Note: Mark as paid endpoint may not exist - use update status instead
   Future<Invoice> markAsPaid(int id, {DateTime? paidAt}) async {
-    final response = await _httpClient.post(
-      '/api/v1/invoices/$id/mark-paid',
+    final response = await _httpClient.put(
+      '/api/v1/invoices/$id',
       data: {
+        'status': 'paid',
         'paid_at': paidAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
       },
     );
@@ -85,7 +91,7 @@ class InvoiceApiService {
   }
 
   Future<String> generatePdf(int id) async {
-    final response = await _httpClient.post('/api/v1/invoices/$id/pdf');
+    final response = await _httpClient.get('/api/v1/invoices/$id/pdf');
     return response.data['pdf_url'] ?? '';
   }
 
@@ -107,19 +113,15 @@ class InvoiceApiService {
     }
   }
 
+  // Note: Send invoice endpoint may not exist in backend
   Future<void> sendInvoice(int id, {
     String? email,
     String? channel = 'email',
     String? message,
   }) async {
-    await _httpClient.post(
-      '/api/v1/invoices/$id/send',
-      data: {
-        'email': email,
-        'channel': channel,
-        'message': message,
-      },
-    );
+    // This functionality may need to be implemented in backend
+    // For now, this is a placeholder
+    throw UnimplementedError('Send invoice endpoint not implemented in backend');
   }
 
   Future<Invoice> addItem(int invoiceId, InvoiceItem item) async {

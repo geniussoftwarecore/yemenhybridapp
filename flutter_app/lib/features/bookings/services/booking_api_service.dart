@@ -1,8 +1,16 @@
+// WARNING: This is a disabled version of the booking API service
+// The booking endpoints do not exist in the current backend implementation
+// To enable bookings functionality:
+// 1. Implement /api/v1/bookings endpoints in the backend
+// 2. Add booking routes to the FastAPI router
+// 3. Rename this file back to booking_api_service.dart
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/http.dart';
 import '../../../core/models/api_response.dart';
 import '../models/booking.dart';
 
+// Disabled booking API service provider
 final bookingApiServiceProvider = Provider<BookingApiService>((ref) {
   return BookingApiService(ref.read(httpClientProvider));
 });
@@ -11,6 +19,8 @@ class BookingApiService {
   final HttpClient _httpClient;
 
   BookingApiService(this._httpClient);
+
+  // All methods throw UnimplementedError until backend endpoints are created
 
   Future<BookingListResponse> getBookings({
     int page = 1,
@@ -21,169 +31,30 @@ class BookingApiService {
     DateTime? endDate,
     int? customerId,
   }) async {
-    final queryParams = <String, dynamic>{
-      'page': page,
-      'size': size,
-    };
-    if (status != null) queryParams['status'] = status;
-    if (channel != null) queryParams['channel'] = channel;
-    if (customerId != null) queryParams['customer_id'] = customerId;
-    if (startDate != null) queryParams['start_date'] = startDate.toIso8601String();
-    if (endDate != null) queryParams['end_date'] = endDate.toIso8601String();
-    
-    final response = await _httpClient.get(
-      '/api/v1/bookings',
-      queryParameters: queryParams,
-    );
-
-    return BookingListResponse.fromJson(response.data);
+    throw UnimplementedError('Bookings API not implemented in backend');
   }
 
   Future<Booking> getBooking(int id) async {
-    final response = await _httpClient.get('/api/v1/bookings/$id');
-    return Booking.fromJson(response.data);
+    throw UnimplementedError('Bookings API not implemented in backend');
   }
 
   Future<Booking> createBooking(Booking booking) async {
-    final response = await _httpClient.post(
-      '/api/v1/bookings',
-      data: booking.toJson(),
-    );
-    return Booking.fromJson(response.data);
+    throw UnimplementedError('Bookings API not implemented in backend');
   }
 
   Future<Booking> updateBooking(int id, Booking booking) async {
-    final response = await _httpClient.put(
-      '/api/v1/bookings/$id',
-      data: booking.toJson(),
-    );
-    return Booking.fromJson(response.data);
+    throw UnimplementedError('Bookings API not implemented in backend');
   }
 
   Future<void> deleteBooking(int id) async {
-    await _httpClient.delete('/api/v1/bookings/$id');
-  }
-
-  Future<Booking> updateStatus(int id, BookingStatus status) async {
-    final response = await _httpClient.put(
-      '/api/v1/bookings/$id/status',
-      data: {'status': status.backendValue},
-    );
-    return Booking.fromJson(response.data);
-  }
-
-  Future<Booking> confirmBooking(int id) async {
-    final response = await _httpClient.post('/api/v1/bookings/$id/confirm');
-    return Booking.fromJson(response.data);
-  }
-
-  Future<Booking> cancelBooking(int id, {String? reason}) async {
-    final response = await _httpClient.post(
-      '/api/v1/bookings/$id/cancel',
-      data: {'reason': reason},
-    );
-    return Booking.fromJson(response.data);
-  }
-
-  Future<void> sendBookingNotification(
-    int id, {
-    required BookingChannel channel,
-    String? message,
-    String? phoneNumber,
-    String? email,
-  }) async {
-    await _httpClient.post(
-      '/api/v1/bookings/$id/send-notification',
-      data: {
-        'channel': channel.backendValue,
-        'message': message,
-        'phone_number': phoneNumber,
-        'email': email,
-      },
-    );
+    throw UnimplementedError('Bookings API not implemented in backend');
   }
 
   Future<List<Booking>> getTodaysBookings() async {
-    final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
-
-    return getBookings(
-      startDate: startOfDay,
-      endDate: endOfDay,
-    );
-  }
-
-  Future<List<Booking>> getUpcomingBookings({int days = 7}) async {
-    final now = DateTime.now();
-    final endDate = now.add(Duration(days: days));
-
-    return getBookings(
-      startDate: now,
-      endDate: endDate,
-      status: 'confirmed',
-    );
-  }
-
-  Future<List<Booking>> getBookingsByCustomer(int customerId) async {
-    return getBookings(customerId: customerId);
-  }
-
-  Future<List<Booking>> getBookingsByChannel(BookingChannel channel) async {
-    return getBookings(channel: channel.backendValue);
+    throw UnimplementedError('Bookings API not implemented in backend');
   }
 
   Future<List<Booking>> searchBookings(String query) async {
-    final response = await _httpClient.get(
-      '/api/v1/bookings',
-      queryParameters: {'search': query},
-    );
-
-    return (response.data as List)
-        .map((json) => Booking.fromJson(json))
-        .toList();
-  }
-
-  Future<Map<String, dynamic>> getBookingStats() async {
-    final response = await _httpClient.get('/api/v1/bookings/stats');
-    return response.data;
-  }
-
-  Future<List<Map<String, dynamic>>> getAvailableTimeSlots(DateTime date) async {
-    final response = await _httpClient.get(
-      '/api/v1/bookings/available-slots',
-      queryParameters: {
-        'date': date.toIso8601String().split('T')[0], // YYYY-MM-DD format
-      },
-    );
-
-    return List<Map<String, dynamic>>.from(response.data);
-  }
-
-  // WhatsApp integration methods
-  Future<void> sendWhatsAppBookingConfirmation(
-    int id, {
-    required String phoneNumber,
-    String? customMessage,
-  }) async {
-    await sendBookingNotification(
-      id,
-      channel: BookingChannel.whatsapp,
-      message: customMessage ?? 'Your booking has been confirmed.',
-      phoneNumber: phoneNumber,
-    );
-  }
-
-  Future<void> sendEmailBookingConfirmation(
-    int id, {
-    required String email,
-    String? customMessage,
-  }) async {
-    await sendBookingNotification(
-      id,
-      channel: BookingChannel.email,
-      message: customMessage ?? 'Your booking has been confirmed.',
-      email: email,
-    );
+    throw UnimplementedError('Bookings API not implemented in backend');
   }
 }
