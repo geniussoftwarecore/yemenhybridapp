@@ -50,6 +50,11 @@ outputType = "console"
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 45411
+externalPort = 3000
+
 [deployment]
 deploymentTarget = "autoscale"
-run = ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "5000"]
+run = ["python", "-m", "http.server", "8080", "--directory", "flutter_app/build/web"]
+build = ["flutter", "build", "web", "--release", "--web-renderer", "html"]
