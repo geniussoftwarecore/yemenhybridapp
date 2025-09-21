@@ -46,7 +46,7 @@ class _EngineerDashboardState extends ConsumerState<EngineerDashboard> {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final l10n = AppLocalizations.of(context)!;
 

@@ -4,7 +4,7 @@ class DataTableWidget<T> extends StatefulWidget {
   final String title;
   final List<DataColumn> columns;
   final List<T> data;
-  final Widget Function(T item) rowBuilder;
+  final DataRow Function(T item) rowBuilder;
   final bool isLoading;
   final VoidCallback? onRefresh;
   final Function(String)? onSearch;
