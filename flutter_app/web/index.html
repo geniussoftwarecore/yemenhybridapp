@@ -47,7 +47,7 @@
   </div>
 
   <script>
-    window.addEventListener('load', function(ev) {
+    window.addEventListener('load', function() {
       // Hide loading indicator when Flutter loads
       function hideLoading() {
         const loading = document.getElementById('loading');
@@ -56,24 +56,10 @@
         }
       }
 
-      // Initialize Flutter engine with HTML renderer
-      function initializeEngine(config) {
-        return _flutter.loader.didCreateEngineInitializer.then(function(engineInitializer) {
-          return engineInitializer.initializeEngine({
-            renderer: 'html',
-            ...config
-          });
-        });
-      }
-
-      // Load Flutter app with canonical configuration
-      window._flutter.loader.loadEntrypoint({
-        entrypointUrl: 'main.dart.js',
-        serviceWorker: {
-          serviceWorkerVersion: null // Disable service worker in dev
-        },
+      // Use the official Flutter loader (compatible with dev mode)
+      _flutter.loader.load({
         onEntrypointLoaded: function(engineInitializer) {
-          initializeEngine({renderer: 'html'}).then(function(appRunner) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
             hideLoading();
             appRunner.runApp();
           }).catch(function(error) {
