@@ -33,8 +33,8 @@ class MyApp extends ConsumerWidget {
         Locale('ar'),
       ],
       
-      // RTL support
-      locale: const Locale('en'), // Default to English, can be changed based on user preference
+      // RTL support - let system locale determine the language
+      // locale: const Locale('en'), // Removed to allow system locale detection
       
       // Routing
       routerConfig: router,

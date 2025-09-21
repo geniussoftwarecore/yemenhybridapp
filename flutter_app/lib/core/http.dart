@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'env.dart';
 
@@ -52,15 +53,19 @@ class HttpClient {
       ),
     );
 
-    // Logging interceptor for debug mode
-    _dio.interceptors.add(
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        error: true,
-        logPrint: (obj) => debugPrint(obj.toString()),
-      ),
-    );
+    // Logging interceptor for debug mode only
+    if (kDebugMode) {
+      _dio.interceptors.add(
+        LogInterceptor(
+          requestBody: false, // Disable to prevent logging passwords/sensitive data
+          responseBody: false, // Disable to prevent logging tokens/sensitive data
+          error: true,
+          requestHeader: false, // Don't log headers to avoid logging auth tokens
+          responseHeader: false,
+          logPrint: (obj) => debugPrint(obj.toString()),
+        ),
+      );
+    }
   }
 
   // Auth methods
@@ -144,7 +149,7 @@ class HttpClient {
     );
   }
 
-  // Logout method
+  // Public logout method
   Future<void> logout() async {
     await _clearToken();
   }

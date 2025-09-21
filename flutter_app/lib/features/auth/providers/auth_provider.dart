@@ -56,7 +56,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       final response = await _httpClient.post('/auth/login', data: {
-        'username': email,
+        'email': email,
         'password': password,
       });
 

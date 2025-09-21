@@ -17,7 +17,7 @@ class User {
     return User(
       id: json['id'],
       email: json['email'],
-      name: json['name'] ?? '',
+      name: json['full_name'] ?? '', // Backend uses 'full_name'
       role: json['role'] ?? 'engineer',
       isActive: json['is_active'] ?? true,
     );
@@ -27,7 +27,7 @@ class User {
     return {
       'id': id,
       'email': email,
-      'name': name,
+      'full_name': name, // Backend expects 'full_name'
       'role': role,
       'is_active': isActive,
     };
