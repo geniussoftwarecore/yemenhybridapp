@@ -16,11 +16,23 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "FastAPI Server"
+args = "Flutter Web"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Flutter Web"
+args = "FastAPI Server"
+
+[[workflows.workflow]]
+name = "Flutter Web"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd flutter_app && flutter run -d web-server --web-hostname 0.0.0.0 --web-port 5000"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "FastAPI Server"
@@ -28,23 +40,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload"
-waitForPort = 5000
+args = "cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+waitForPort = 8000
 
 [workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow]]
-name = "Flutter Web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd flutter_app && flutter run -d web-server --web-hostname 0.0.0.0 --web-port 5000"
-waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
+outputType = "console"
 
 [[ports]]
 localPort = 5000
