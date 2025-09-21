@@ -33,6 +33,10 @@ from ..db.schemas import (
     ApprovalRequestResponse
 )
 from ..services.audit import log_action
+from ..services.notify import notify
+
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/workorders", tags=["Work Orders"])
 
@@ -313,6 +317,9 @@ async def finish_workorder(
     
     await db.commit()
     await db.refresh(workorder)
+    
+    # Send pickup notification
+    await _send_pickup_notification(workorder, db)
     
     return workorder
 
@@ -616,6 +623,9 @@ async def send_approval_to_customer(
     await db.commit()
     await db.refresh(approval_request)
     
+    # Send approval notification
+    await _send_approval_notification(workorder, approval_request, db)
+    
     return approval_request
 
 @router.delete("/{workorder_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -644,3 +654,207 @@ async def delete_workorder(
     # Delete work order (cascades to items, media, etc.)
     await db.delete(workorder)
     await db.commit()
+
+
+# Helper functions for notifications
+async def _send_approval_notification(workorder: WorkOrder, approval_request: ApprovalRequest, db: AsyncSession):
+    """Send approval notification to customer."""
+    try:
+        # Get customer with related data
+        customer_query = (
+            select(Customer)
+            .options(selectinload(Customer.vehicles))
+            .where(Customer.id == workorder.customer_id)
+        )
+        customer_result = await db.execute(customer_query)
+        customer = customer_result.scalar_one_or_none()
+        
+        if not customer:
+            logger.error(f"Customer not found for work order {workorder.id}")
+            return
+        
+        # Get vehicle info
+        vehicle_query = select(Vehicle).where(Vehicle.id == workorder.vehicle_id)
+        vehicle_result = await db.execute(vehicle_query)
+        vehicle = vehicle_result.scalar_one_or_none()
+        
+        if not vehicle:
+            logger.error(f"Vehicle not found for work order {workorder.id}")
+            return
+        
+        # Get the domain for URL generation
+        domain = os.getenv('REPLIT_DEV_DOMAIN', 'localhost:5000')
+        protocol = 'https' if not domain.startswith('localhost') else 'http'
+        approval_url = f"{protocol}://{domain}/public/approve/{approval_request.token}"
+        
+        # Format estimates
+        est_total = f"${workorder.est_total:.2f}" if workorder.est_total else "TBD"
+        vehicle_info = f"{vehicle.year} {vehicle.make} {vehicle.model} ({vehicle.plate_no})"
+        
+        # Send notification based on channel
+        if approval_request.sent_via == ApprovalChannel.EMAIL:
+            if customer.email:
+                subject = f"Service Approval Required - Work Order #{workorder.id}"
+                html = f"""
+                <html>
+                <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #007bff;">Yemen Hybrid Service Center</h2>
+                    <h3>Service Approval Required</h3>
+                    
+                    <p>Dear {customer.name},</p>
+                    
+                    <p>Your vehicle service estimate is ready for approval:</p>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p><strong>Vehicle:</strong> {vehicle_info}</p>
+                        <p><strong>Work Order #:</strong> {workorder.id}</p>
+                        <p><strong>Issue:</strong> {workorder.complaint or 'Service required'}</p>
+                        <p><strong>Total Estimate:</strong> <span style="font-size: 18px; color: #007bff;">{est_total}</span></p>
+                    </div>
+                    
+                    <p>Please click the link below to review the details and approve or decline the service:</p>
+                    
+                    <p style="text-align: center; margin: 30px 0;">
+                        <a href="{approval_url}" style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                            Review & Approve Service
+                        </a>
+                    </p>
+                    
+                    <p><small>This link will expire in 24 hours. If you have any questions, please contact us.</small></p>
+                    
+                    <p>Best regards,<br>Yemen Hybrid Service Center</p>
+                </body>
+                </html>
+                """
+                await notify.send_email(customer.email, subject, html)
+            else:
+                logger.warning(f"Customer {customer.id} has no email address for approval notification")
+        
+        elif approval_request.sent_via == ApprovalChannel.WHATSAPP:
+            if customer.phone:
+                text = f"""
+🔧 *Yemen Hybrid Service Center*
+
+Dear {customer.name},
+
+Your vehicle service estimate is ready for approval:
+
+*Vehicle:* {vehicle_info}
+*Work Order #:* {workorder.id}
+*Issue:* {workorder.complaint or 'Service required'}
+*Total Estimate:* {est_total}
+
+Please review and approve: {approval_url}
+
+This link expires in 24 hours.
+                """.strip()
+                await notify.send_whatsapp(customer.phone, text)
+            else:
+                logger.warning(f"Customer {customer.id} has no phone number for WhatsApp notification")
+    
+    except Exception as e:
+        logger.error(f"Failed to send approval notification for work order {workorder.id}: {str(e)}")
+
+
+async def _send_pickup_notification(workorder: WorkOrder, db: AsyncSession):
+    """Send pickup notification to customer with AFTER photos."""
+    try:
+        # Get customer
+        customer_query = select(Customer).where(Customer.id == workorder.customer_id)
+        customer_result = await db.execute(customer_query)
+        customer = customer_result.scalar_one_or_none()
+        
+        if not customer:
+            logger.error(f"Customer not found for work order {workorder.id}")
+            return
+        
+        # Get vehicle info
+        vehicle_query = select(Vehicle).where(Vehicle.id == workorder.vehicle_id)
+        vehicle_result = await db.execute(vehicle_query)
+        vehicle = vehicle_result.scalar_one_or_none()
+        
+        if not vehicle:
+            logger.error(f"Vehicle not found for work order {workorder.id}")
+            return
+        
+        # Get AFTER photos
+        after_media_query = (
+            select(Media)
+            .where(Media.work_order_id == workorder.id)
+            .where(Media.phase == MediaPhase.AFTER)
+        )
+        after_media_result = await db.execute(after_media_query)
+        after_media = after_media_result.scalars().all()
+        
+        # Get domain for photo URLs
+        domain = os.getenv('REPLIT_DEV_DOMAIN', 'localhost:5000')
+        protocol = 'https' if not domain.startswith('localhost') else 'http'
+        after_photo_urls = [f"{protocol}://{domain}/api/v1/workorders/media/{media.path}" for media in after_media]
+        
+        vehicle_info = f"{vehicle.year} {vehicle.make} {vehicle.model} ({vehicle.plate_no})"
+        final_cost = f"${workorder.final_cost:.2f}" if workorder.final_cost else "Final cost TBD"
+        
+        # Send email notification
+        if customer.email:
+            subject = f"Service Complete - Ready for Pickup #{workorder.id}"
+            photo_html = ""
+            if after_photo_urls:
+                photo_html = "<h3>Service Completion Photos:</h3><div style='display: flex; flex-wrap: wrap; gap: 10px;'>"
+                for url in after_photo_urls:
+                    photo_html += f"<img src='{url}' style='width: 200px; height: 150px; object-fit: cover; border-radius: 5px;'>"
+                photo_html += "</div>"
+            
+            html = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #28a745;">Yemen Hybrid Service Center</h2>
+                <h3>🎉 Service Complete - Ready for Pickup!</h3>
+                
+                <p>Dear {customer.name},</p>
+                
+                <p>Great news! Your vehicle service has been completed and is ready for pickup:</p>
+                
+                <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
+                    <p><strong>Vehicle:</strong> {vehicle_info}</p>
+                    <p><strong>Work Order #:</strong> {workorder.id}</p>
+                    <p><strong>Service:</strong> {workorder.complaint or 'Service completed'}</p>
+                    <p><strong>Final Cost:</strong> <span style="font-size: 18px; color: #28a745;">{final_cost}</span></p>
+                </div>
+                
+                {photo_html}
+                
+                <p>Please contact us to schedule your pickup or visit us during business hours.</p>
+                
+                <p>Thank you for choosing Yemen Hybrid Service Center!</p>
+                
+                <p>Best regards,<br>Yemen Hybrid Service Center</p>
+            </body>
+            </html>
+            """
+            await notify.send_email(customer.email, subject, html)
+        
+        # Send WhatsApp notification
+        if customer.phone:
+            text = f"""
+🎉 *Yemen Hybrid Service Center*
+
+Dear {customer.name},
+
+Great news! Your vehicle service is complete and ready for pickup:
+
+*Vehicle:* {vehicle_info}
+*Work Order #:* {workorder.id}
+*Service:* {workorder.complaint or 'Service completed'}
+*Final Cost:* {final_cost}
+
+Please contact us to schedule pickup or visit during business hours.
+
+Thank you for choosing Yemen Hybrid! 🚗✨
+            """.strip()
+            
+            await notify.send_whatsapp(customer.phone, text, after_photo_urls)
+    
+    except Exception as e:
+        logger.error(f"Failed to send pickup notification for work order {workorder.id}: {str(e)}")
+
+
