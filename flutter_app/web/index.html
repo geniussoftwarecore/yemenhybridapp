@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Yemen Hybrid Flutter App">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,24 +14,71 @@
   <title>Yemen Hybrid</title>
   <base href="/">
 
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = "{{flutter_service_worker_version}}";
-  </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
 <body>
+  <div id="loading">
+    <div style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #333;
+    ">
+      <div style="
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      "></div>
+      <p>Loading Yemen Hybrid...</p>
+    </div>
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </div>
+
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.load({
+      // Hide loading indicator when Flutter loads
+      function hideLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.display = 'none';
+        }
+      }
+
+      // Initialize Flutter engine with HTML renderer
+      function initializeEngine(config) {
+        return _flutter.loader.didCreateEngineInitializer.then(function(engineInitializer) {
+          return engineInitializer.initializeEngine({
+            renderer: 'html',
+            ...config
+          });
+        });
+      }
+
+      // Load Flutter app with canonical configuration
+      window._flutter.loader.loadEntrypoint({
+        entrypointUrl: 'main.dart.js',
         serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
+          serviceWorkerVersion: null // Disable service worker in dev
         },
         onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
+          initializeEngine({renderer: 'html'}).then(function(appRunner) {
+            hideLoading();
             appRunner.runApp();
+          }).catch(function(error) {
+            console.error('Failed to initialize Flutter app:', error);
+            hideLoading();
           });
         }
       });

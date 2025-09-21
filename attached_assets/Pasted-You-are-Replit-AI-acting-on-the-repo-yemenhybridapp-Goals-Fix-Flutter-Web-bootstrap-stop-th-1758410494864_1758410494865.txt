@@ -1,0 +1,61 @@
+You are Replit AI acting on the repo yemenhybridapp.
+
+Goals:
+- Fix Flutter Web bootstrap (stop the endless Loading and the “FlutterLoader.load requires _flutter.buildConfig”).
+- Prepare base folders/utilities for screens and API.
+
+FRONTEND (flutter_app):
+1) Ensure pubspec.yaml has:
+   flutter_dotenv:^5.1.0, dio:^5.5.0+1, go_router:^14.2.7,
+   flutter_riverpod:^2.5.1, intl:^0.19.0, fl_chart:^0.68.0,
+   image_picker:^1.1.2, file_picker:^8.3.7, shared_preferences:^2.2.3,
+   flutter_localizations (SDK).
+   And:
+   flutter:
+     assets:
+       - .env
+   Then run: flutter pub get
+
+2) Create folders:
+   lib/core/{env,net,theme,widgets}
+   lib/shared/{models,dto,providers,fakes}
+   lib/features/{splash,auth,dashboard,customers,vehicles,workorders,approvals,media,invoices,bookings,services,parts,reports,users,settings}
+   lib/routing
+
+3) Add environment + HTTP:
+   - lib/core/env/env.dart: read API_BASE_URL and API_TIMEOUT_MS with safe defaults.
+   - lib/core/net/dio_client.dart: a Dio singleton with timeouts + error interceptor (never block UI).
+   - lib/shared/providers/app_providers.dart: Riverpod providers for Dio and AuthState placeholder.
+
+4) App + Router:
+   - lib/app.dart: MaterialApp.router (Material 3, ar/en locales).
+   - lib/main.dart: load .env with 2s timeout (non-blocking) then runApp.
+   - lib/routing/app_router.dart: routes placeholders /splash, /login, /gate, /dashboard/:role.
+
+5) Web bootstrap fix:
+   Overwrite flutter_app/web/index.html with a canonical template:
+     - <base href="/"> present
+     - window._flutter.loader.loadEntrypoint({ entrypointUrl:'main.dart.js', serviceWorker:{serviceWorkerVersion:null}, onEntrypointLoaded: initializeEngine({renderer:'html'}) })
+     - Do NOT register service worker in dev.
+
+BACKEND (backend):
+6) Minimal API ready:
+   - backend/app/main.py: FastAPI + CORS; GET /health returns {"ok":true}.
+   - backend/app/core/config.py: read .env; DATABASE_URL fallback "sqlite+aiosqlite:///./dev.db".
+   - backend/app/core/security.py: JWT (PyJWT) + bcrypt utils.
+   - backend/app/db/session.py: async engine + session + Base.
+   - backend/app/db/models.py: Base + RoleEnum (admin/sales/engineer).
+   - backend/app/api/auth.py: POST /auth/login; on startup seed 3 users if empty (admin/sales/engineer with password Passw0rd!).
+
+7) backend/.env.sample:
+   DATABASE_URL=
+   JWT_SECRET=devsecret
+   JWT_ALG=HS256
+   ALLOWED_ORIGINS=http://localhost:5173
+   STORAGE_DIR=./storage
+
+QA:
+- Run backend: uvicorn app.main:app --reload --port 8000  → GET /health ok
+- Run frontend web: flutter run -d chrome --web-renderer html  → no infinite Loading
+
+Print: DONE:SCREEN-0

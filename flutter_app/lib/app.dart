@@ -1,38 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'core/i18n/app_localizations.dart';
-import 'core/theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'routing/app_router.dart';
+import 'core/i18n/app_localizations.dart';
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-
     return MaterialApp.router(
       title: 'Yemen Hybrid',
       debugShowCheckedModeBanner: false,
       
-      // Theme
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      // Material 3 theme
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 2,
+        ),
+      ),
       
-      // Localization
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      // Dark theme
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 2,
+        ),
+      ),
+      
+      // Localization support (Arabic & English)
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       supportedLocales: const [
-        Locale('en'),
-        Locale('ar'),
+        Locale('en'), // English
+        Locale('ar'), // Arabic
       ],
       
-      // RTL support - let system locale determine the language
-      // locale: const Locale('en'), // Removed to allow system locale detection
-      
-      // Routing
-      routerConfig: router,
+      // Router configuration
+      routerConfig: AppRouter.router,
     );
   }
 }
