@@ -99,9 +99,6 @@ async def health_check():
     """Health check endpoint."""
     return {"ok": True}
 
-# Mount static files if storage directory exists
-if os.path.exists(settings.storage_dir):
-    app.mount("/static", StaticFiles(directory=settings.storage_dir), name="static")
 
 # Include routers
 app.include_router(auth.router, prefix="/api/v1")
@@ -116,6 +113,15 @@ app.include_router(reports.router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
 app.include_router(approvals.router, prefix="/api/v1")
 app.include_router(public.router)  # No prefix for public endpoints
+
+# Mount static files for storage if directory exists
+if os.path.exists(settings.storage_dir):
+    app.mount("/static", StaticFiles(directory=settings.storage_dir), name="static")
+
+# Mount Flutter web build for production (must be last)
+flutter_build_dir = "../flutter_app/build/web"
+if os.path.exists(flutter_build_dir):
+    app.mount("/", StaticFiles(directory=flutter_build_dir, html=True), name="flutter_web")
 
 # Global exception handler
 @app.exception_handler(Exception)
