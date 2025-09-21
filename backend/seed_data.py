@@ -268,8 +268,7 @@ async def create_sample_vehicles(db: AsyncSession, customers: list) -> list:
             "vin": "JTDKB20U123456789",
             "color": "Silver",
             "odometer": 45000,
-            "hybrid_type": "Full Hybrid",
-            "notes": "Well maintained, regular service history"
+            "hybrid_type": "Full Hybrid"
         },
         {
             "customer": customers[1],
@@ -280,8 +279,7 @@ async def create_sample_vehicles(db: AsyncSession, customers: list) -> list:
             "vin": "JTDKB30U987654321",
             "color": "Blue",
             "odometer": 62000,
-            "hybrid_type": "Full Hybrid",
-            "notes": "Company fleet vehicle"
+            "hybrid_type": "Full Hybrid"
         },
         {
             "customer": customers[2],
@@ -292,8 +290,7 @@ async def create_sample_vehicles(db: AsyncSession, customers: list) -> list:
             "vin": "JHMZE2H30MS123456",
             "color": "White",
             "odometer": 28000,
-            "hybrid_type": "Full Hybrid",
-            "notes": "Second vehicle, low mileage"
+            "hybrid_type": "Full Hybrid"
         },
         {
             "customer": customers[3],
@@ -304,8 +301,7 @@ async def create_sample_vehicles(db: AsyncSession, customers: list) -> list:
             "vin": "JTDKB50U789123456",
             "color": "Green",
             "odometer": 8000,
-            "hybrid_type": "Plug-in Hybrid",
-            "notes": "Latest model, eco-friendly features"
+            "hybrid_type": "Plug-in Hybrid"
         },
         {
             "customer": customers[4],
@@ -316,8 +312,7 @@ async def create_sample_vehicles(db: AsyncSession, customers: list) -> list:
             "vin": "JHMCR6F75KC123456",
             "color": "Red",
             "odometer": 95000,
-            "hybrid_type": "Full Hybrid",
-            "notes": "High mileage taxi, frequent service needed"
+            "hybrid_type": "Full Hybrid"
         }
     ]
     
@@ -344,38 +339,32 @@ async def create_sample_workorders(db: AsyncSession, customers: list, vehicles: 
             "customer": customers[0],
             "vehicle": vehicles[0],
             "complaint": "Engine making unusual noise during startup",
-            "diagnosis": "Hybrid battery cooling system needs inspection",
             "status": WorkOrderStatus.NEW,
             "created_by": engineer.id,
-            "assigned_to": engineer.id,
-            "notes": "Customer reports noise started 2 weeks ago"
+            "notes": "Customer reports noise started 2 weeks ago. Hybrid battery cooling system needs inspection."
         },
         {
             "customer": customers[1], 
             "vehicle": vehicles[1],
             "complaint": "Reduced fuel efficiency",
-            "diagnosis": "Air filter replacement needed",
             "status": WorkOrderStatus.IN_PROGRESS,
             "created_by": engineer.id,
-            "assigned_to": engineer.id,
             "started_at": datetime.utcnow() - timedelta(hours=2),
             "est_parts": Decimal("25.00"),
             "est_labor": Decimal("45.00"),
-            "notes": "Diagnostic completed, parts installed"
+            "notes": "Diagnostic completed, air filter replacement needed. Parts installed."
         },
         {
             "customer": customers[2],
             "vehicle": vehicles[2], 
             "complaint": "Regular maintenance service",
-            "diagnosis": "Oil change and general inspection completed", 
             "status": WorkOrderStatus.DONE,
             "created_by": engineer.id,
-            "assigned_to": engineer.id,
             "started_at": datetime.utcnow() - timedelta(days=1),
             "completed_at": datetime.utcnow() - timedelta(hours=6),
             "est_parts": Decimal("20.00"),
             "est_labor": Decimal("45.00"),
-            "notes": "Routine maintenance completed successfully"
+            "notes": "Oil change and general inspection completed. Routine maintenance completed successfully."
         }
     ]
     
@@ -413,7 +402,7 @@ async def add_workorder_items(db: AsyncSession, workorders: list):
         ),
         WorkOrderItem(
             work_order_id=done_wo.id,
-            item_type=ItemType.SERVICE,
+            item_type=ItemType.LABOR,
             name="Oil Change",
             qty=Decimal("1"),
             unit_price=Decimal("45.00")
