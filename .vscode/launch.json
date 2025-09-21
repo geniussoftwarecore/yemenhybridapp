@@ -1,0 +1,64 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FastAPI Backend",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/app/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/backend"
+            },
+            "args": []
+        },
+        {
+            "name": "FastAPI Backend (uvicorn)",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend",
+            "args": [
+                "app.main:app",
+                "--reload",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000"
+            ]
+        },
+        {
+            "name": "Flutter Web Debug",
+            "type": "dart",
+            "request": "launch",
+            "program": "${workspaceFolder}/flutter_app/lib/main.dart",
+            "cwd": "${workspaceFolder}/flutter_app",
+            "deviceId": "web-server",
+            "args": [
+                "--web-hostname",
+                "0.0.0.0",
+                "--web-port",
+                "5000"
+            ]
+        },
+        {
+            "name": "Flutter Chrome Debug",
+            "type": "dart",
+            "request": "launch",
+            "program": "${workspaceFolder}/flutter_app/lib/main.dart",
+            "cwd": "${workspaceFolder}/flutter_app",
+            "deviceId": "chrome"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full Stack (Backend + Frontend)",
+            "configurations": [
+                "FastAPI Backend (uvicorn)",
+                "Flutter Web Debug"
+            ]
+        }
+    ]
+}
