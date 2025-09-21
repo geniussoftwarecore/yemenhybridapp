@@ -1,51 +1,40 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
-    />
-    <title>Yemen Hybrid</title>
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Yemen Hybrid Flutter App">
 
-    <!-- Correct base href for Flutter web routing -->
-    <base href="/" />
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Yemen Hybrid">
 
-    <!-- Prefer HTML renderer in constrained environments like Replit -->
-    <meta name="renderer" content="html" />
+  <title>Yemen Hybrid</title>
+  <base href="/">
 
-    <!-- Prevent stale SW during dev -->
-    <meta http-equiv="Cache-Control" content="no-store" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-
-    <!-- Service worker version injected by flutter build -->
-    <script>
-      const serviceWorkerVersion = "{{flutter_service_worker_version}}";
-    </script>
-
-    <!-- Flutter loader -->
-    <script src="flutter.js" defer></script>
-  </head>
-
-  <body>
-    <script>
-      // Bootstrap Flutter Web using the modern API
-      window.addEventListener('load', function () {
-        // Use the modern FlutterLoader.load API
-        _flutter.loader.load({
-          serviceWorker: {
-            serviceWorkerVersion: serviceWorkerVersion,
-          },
-          onEntrypointLoaded: function (engineInitializer) {
-            engineInitializer.initializeEngine({
-              renderer: 'html'
-            }).then(function (appRunner) {
-              appRunner.runApp();
-            });
-          },
-        });
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    var serviceWorkerVersion = "{{flutter_service_worker_version}}";
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <script>
+    window.addEventListener('load', function(ev) {
+      // Download main.dart.js
+      _flutter.loader.load({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+        }
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>
