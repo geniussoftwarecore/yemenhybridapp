@@ -6,6 +6,10 @@ class Env {
   }
 
   static Future<void> load() async {
-    await dotenv.load(fileName: '.env');
+    try {
+      await dotenv.load(fileName: '.env');
+    } catch (e) {
+      print('Warning: Could not load .env file, using defaults');
+    }
   }
 }

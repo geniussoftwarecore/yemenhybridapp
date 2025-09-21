@@ -19,10 +19,9 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
-    <!-- DO NOT register a service worker in dev -->
+    <!-- Service worker version injected by flutter build -->
     <script>
-      // In dev we keep serviceWorkerVersion = null to avoid registration.
-      const serviceWorkerVersion = null;
+      const serviceWorkerVersion = "{{flutter_service_worker_version}}";
     </script>
 
     <!-- Flutter loader -->
@@ -31,20 +30,16 @@
 
   <body>
     <script>
-      // Bootstrap Flutter Web correctly; do NOT call FlutterLoader.load() directly.
+      // Bootstrap Flutter Web using the modern API
       window.addEventListener('load', function () {
-        // Ensure global _flutter exists from flutter.js
-        if (!window._flutter || !window._flutter.loader) {
-          console.error('flutter.js not loaded');
-          return;
-        }
-
-        window._flutter.loader.loadEntrypoint({
-          entrypointUrl: 'main.dart.js',              // explicit entrypoint
-          serviceWorker: { serviceWorkerVersion },    // disabled in dev
+        // Use the modern FlutterLoader.load API
+        _flutter.loader.load({
+          serviceWorker: {
+            serviceWorkerVersion: serviceWorkerVersion,
+          },
           onEntrypointLoaded: function (engineInitializer) {
             engineInitializer.initializeEngine({
-              renderer: 'html'                        // prefer HTML renderer
+              renderer: 'html'
             }).then(function (appRunner) {
               appRunner.runApp();
             });
