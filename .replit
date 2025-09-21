@@ -1,4 +1,4 @@
-modules = ["python-3.11", "web"]
+modules = ["python-3.11", "web", "flutter"]
 [agent]
 expertMode = true
 
@@ -33,10 +33,6 @@ outputType = "webview"
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 34499
-externalPort = 3001
 
 [[ports]]
 localPort = 34925
