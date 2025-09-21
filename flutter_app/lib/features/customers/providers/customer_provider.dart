@@ -14,6 +14,12 @@ final customerListProvider = FutureProvider<List<Customer>>((ref) async {
   return apiService.getCustomers(filters: filters);
 });
 
+// Unfiltered customer list provider for forms and dropdowns
+final customerAllProvider = FutureProvider<List<Customer>>((ref) async {
+  final apiService = ref.read(customerApiServiceProvider);
+  return apiService.getCustomers();
+});
+
 // Customer notifier for CRUD operations
 final customerNotifierProvider = StateNotifierProvider<CustomerNotifier, AsyncValue<List<Customer>>>((ref) {
   return CustomerNotifier(ref.read(customerApiServiceProvider));
@@ -70,6 +76,12 @@ class CustomerNotifier extends StateNotifier<AsyncValue<List<Customer>>> {
     } catch (error) {
       rethrow;
     }
+  }
+
+  // Method to invalidate all customer providers
+  void invalidateProviders(WidgetRef ref) {
+    ref.invalidate(customerListProvider);
+    ref.invalidate(customerAllProvider);
   }
 
   Future<List<Customer>> searchCustomers(String query) async {

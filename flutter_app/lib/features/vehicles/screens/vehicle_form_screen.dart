@@ -73,7 +73,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final customersAsync = ref.watch(customerListProvider);
+    final customersAsync = ref.watch(customerAllProvider);
     final availableMakes = ref.watch(vehicleMakesProvider);
 
     return Scaffold(

@@ -45,7 +45,7 @@ class _VehiclesScreenState extends ConsumerState<VehiclesScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                ref.refresh(vehicleListProvider.future);
+                await ref.refresh(vehicleListProvider.future);
               },
               child: vehiclesAsync.when(
                 data: (vehicles) => _buildVehiclesList(vehicles),
@@ -274,8 +274,8 @@ class _VehiclesScreenState extends ConsumerState<VehiclesScreen> {
         builder: (context) => VehicleFormScreen(vehicle: vehicle),
       ),
     ).then((_) {
-      // Refresh the list when returning from form
-      ref.refresh(vehicleListProvider.future);
+      // Invalidate all vehicle providers when returning from form
+      ref.read(vehicleNotifierProvider.notifier).invalidateProviders(ref);
     });
   }
 
@@ -385,8 +385,8 @@ class _VehiclesScreenState extends ConsumerState<VehiclesScreen> {
               Navigator.of(context).pop();
               try {
                 await ref.read(vehicleNotifierProvider.notifier).deleteVehicle(vehicle.id!);
-                // Refresh the list to ensure UI updates
-                ref.refresh(vehicleListProvider.future);
+                // Invalidate all vehicle providers to ensure UI updates
+                ref.read(vehicleNotifierProvider.notifier).invalidateProviders(ref);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('${vehicle.displayName} deleted successfully')),

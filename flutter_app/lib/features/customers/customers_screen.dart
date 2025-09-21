@@ -44,7 +44,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                ref.refresh(customerListProvider.future);
+                await ref.refresh(customerListProvider.future);
               },
               child: customersAsync.when(
                 data: (customers) => _buildCustomersList(customers),
@@ -272,8 +272,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         builder: (context) => CustomerFormScreen(customer: customer),
       ),
     ).then((_) {
-      // Refresh the list when returning from form
-      ref.refresh(customerListProvider.future);
+      // Invalidate all customer providers when returning from form
+      ref.read(customerNotifierProvider.notifier).invalidateProviders(ref);
     });
   }
 
@@ -376,8 +376,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
               Navigator.of(context).pop();
               try {
                 await ref.read(customerNotifierProvider.notifier).deleteCustomer(customer.id!);
-                // Refresh the list to ensure UI updates
-                ref.refresh(customerListProvider.future);
+                // Invalidate all customer providers to ensure UI updates
+                ref.read(customerNotifierProvider.notifier).invalidateProviders(ref);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('${customer.name} deleted successfully')),

@@ -14,6 +14,12 @@ final vehicleListProvider = FutureProvider<List<Vehicle>>((ref) async {
   return apiService.getVehicles(filters: filters);
 });
 
+// Unfiltered vehicle list provider for forms and dropdowns
+final vehicleAllProvider = FutureProvider<List<Vehicle>>((ref) async {
+  final apiService = ref.read(vehicleApiServiceProvider);
+  return apiService.getVehicles();
+});
+
 // Vehicle notifier for CRUD operations
 final vehicleNotifierProvider = StateNotifierProvider<VehicleNotifier, AsyncValue<List<Vehicle>>>((ref) {
   return VehicleNotifier(ref.read(vehicleApiServiceProvider));
@@ -70,6 +76,12 @@ class VehicleNotifier extends StateNotifier<AsyncValue<List<Vehicle>>> {
     } catch (error) {
       rethrow;
     }
+  }
+
+  // Method to invalidate all vehicle providers
+  void invalidateProviders(WidgetRef ref) {
+    ref.invalidate(vehicleListProvider);
+    ref.invalidate(vehicleAllProvider);
   }
 
   Future<List<Vehicle>> searchVehicles(String query) async {
