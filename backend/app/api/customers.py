@@ -20,7 +20,7 @@ async def get_customers(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Page size"),
     q: Optional[str] = Query(None, description="Search query for name, phone, or email"),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -57,11 +57,11 @@ async def get_customers(
     customers = result.scalars().all()
     
     # Calculate pagination info
-    pages = math.ceil(total / size)
+    pages = math.ceil((total or 0) / size)
     
     return CustomerListResponse(
-        items=customers,
-        total=total,
+        items=[CustomerResponse.model_validate(customer) for customer in customers],
+        total=total or 0,
         page=page,
         size=size,
         pages=pages
@@ -70,7 +70,7 @@ async def get_customers(
 @router.post("/", response_model=CustomerResponse, status_code=status.HTTP_201_CREATED)
 async def create_customer(
     customer_data: CustomerCreate,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(require_roles(UserRole.sales, UserRole.admin)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -92,7 +92,7 @@ async def create_customer(
 @router.get("/{customer_id}", response_model=CustomerResponse)
 async def get_customer(
     customer_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get customer by ID."""
@@ -112,7 +112,7 @@ async def get_customer(
 async def update_customer(
     customer_id: int,
     customer_data: CustomerUpdate,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(require_roles(UserRole.sales, UserRole.admin)),
     db: AsyncSession = Depends(get_db)
 ):
     """

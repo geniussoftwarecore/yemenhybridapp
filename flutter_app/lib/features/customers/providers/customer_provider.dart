@@ -11,13 +11,19 @@ final customerSearchFiltersProvider = StateProvider<CustomerSearchFilters>((ref)
 final customerListProvider = FutureProvider<List<Customer>>((ref) async {
   final apiService = ref.read(customerApiServiceProvider);
   final filters = ref.watch(customerSearchFiltersProvider);
-  return apiService.getCustomers(filters: filters);
+  final response = await apiService.getCustomers(
+    page: filters.page ?? 1,
+    size: filters.limit ?? 10,
+    search: filters.query,
+  );
+  return response.items;
 });
 
 // Unfiltered customer list provider for forms and dropdowns
 final customerAllProvider = FutureProvider<List<Customer>>((ref) async {
   final apiService = ref.read(customerApiServiceProvider);
-  return apiService.getCustomers();
+  final response = await apiService.getCustomers(page: 1, size: 100);
+  return response.items;
 });
 
 // Customer notifier for CRUD operations
@@ -35,8 +41,8 @@ class CustomerNotifier extends StateNotifier<AsyncValue<List<Customer>>> {
   Future<void> _loadCustomers() async {
     try {
       state = const AsyncValue.loading();
-      final customers = await _apiService.getCustomers();
-      state = AsyncValue.data(customers);
+      final response = await _apiService.getCustomers(page: 1, size: 50);
+      state = AsyncValue.data(response.items);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -57,7 +63,9 @@ class CustomerNotifier extends StateNotifier<AsyncValue<List<Customer>>> {
     }
   }
 
-  Future<Customer> updateCustomer(int id, Customer customer) async {
+  Future<Customer> updateCustomer(Customer customer) async {
+    final id = customer.id;
+    if (id == null) throw Exception('Customer ID is required for update');
     try {
       final updatedCustomer = await _apiService.updateCustomer(id, customer);
       // Refresh the list
@@ -86,7 +94,8 @@ class CustomerNotifier extends StateNotifier<AsyncValue<List<Customer>>> {
 
   Future<List<Customer>> searchCustomers(String query) async {
     try {
-      return await _apiService.searchCustomers(query);
+      final response = await _apiService.searchCustomers(query);
+      return response.items;
     } catch (error) {
       rethrow;
     }
@@ -98,3 +107,6 @@ final customerProvider = FutureProvider.family<Customer, int>((ref, id) async {
   final apiService = ref.read(customerApiServiceProvider);
   return apiService.getCustomer(id);
 });
+
+// Alias for backwards compatibility
+final customerByIdProvider = customerProvider;

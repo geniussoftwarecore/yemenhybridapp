@@ -6,6 +6,9 @@ import '../features/auth/login_page.dart';
 import '../features/auth/role_gate.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/customers/customers_list_page.dart';
+import '../features/customers/screens/customer_details_page.dart';
+import '../features/customers/screens/customer_form_page.dart';
 import '../core/widgets/app_shell.dart';
 
 // Router provider that can access auth state
@@ -22,8 +25,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Don't redirect while loading
       if (isLoading) return null;
       
-      // If accessing dashboard routes without auth, redirect to login
-      if (currentPath.startsWith('/dashboard') && !isAuthenticated) {
+      // If accessing protected routes without auth, redirect to login
+      if ((currentPath.startsWith('/dashboard') || currentPath.startsWith('/customers')) && !isAuthenticated) {
         return '/login';
       }
       
@@ -65,6 +68,32 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) {
               final role = state.pathParameters['role'] ?? 'engineer';
               return DashboardScreen(role: role);
+            },
+          ),
+          GoRoute(
+            path: '/customers',
+            name: 'customers',
+            builder: (context, state) => const CustomersListPage(),
+          ),
+          GoRoute(
+            path: '/customers/new',
+            name: 'customer-new',
+            builder: (context, state) => const CustomerFormPage(),
+          ),
+          GoRoute(
+            path: '/customers/:id',
+            name: 'customer-details',
+            builder: (context, state) {
+              final customerId = state.pathParameters['id']!;
+              return CustomerDetailsPage(customerId: customerId);
+            },
+          ),
+          GoRoute(
+            path: '/customers/:id/edit',
+            name: 'customer-edit',
+            builder: (context, state) {
+              final customerId = state.pathParameters['id']!;
+              return CustomerFormPage(customerId: customerId);
             },
           ),
         ],

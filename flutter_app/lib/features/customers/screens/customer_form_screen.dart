@@ -272,7 +272,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
 
       if (_isEditing) {
         await ref.read(customerNotifierProvider.notifier)
-            .updateCustomer(widget.customer!.id!, customer);
+            .updateCustomer(customer);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

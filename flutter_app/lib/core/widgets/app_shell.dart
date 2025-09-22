@@ -21,14 +21,24 @@ class _AppShellState extends ConsumerState<AppShell> {
   int selectedIndex = 0;
 
   List<NavigationItem> get navigationItems {
-    // For now, only show the main dashboard route until other routes are implemented
-    return [
+    final items = [
       NavigationItem(
         icon: Icons.dashboard,
         label: 'Dashboard',
         route: '/dashboard/${widget.userRole}',
       ),
     ];
+
+    // Add customers for all authenticated users (engineer gets read-only access)
+    items.add(
+      NavigationItem(
+        icon: Icons.people,
+        label: 'Customers',
+        route: '/customers',
+      ),
+    );
+
+    return items;
   }
 
   @override
