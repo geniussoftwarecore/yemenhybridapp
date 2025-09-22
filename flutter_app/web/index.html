@@ -14,6 +14,11 @@
   <title>Yemen Hybrid</title>
   <base href="/">
 
+  <script>
+    // Flutter web bootstrap
+    var _flutter = _flutter || {};
+    _flutter.buildConfig = _flutter.buildConfig || {};
+  </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
@@ -56,21 +61,34 @@
         }
       }
 
-      // Initialize Flutter
-      _flutter.loader.load({
-        serviceWorker: {
-          serviceWorkerVersion: null,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            hideLoading();
-            appRunner.runApp();
-          }).catch(function(error) {
-            console.error('Failed to initialize Flutter app:', error);
-            hideLoading();
-          });
+      // Simple Flutter initialization with error handling
+      function initializeFlutter() {
+        try {
+          if (typeof _flutter !== 'undefined' && _flutter.loader && typeof _flutter.loader.load === 'function') {
+            _flutter.loader.load().then(function(engineInitializer) {
+              return engineInitializer.initializeEngine();
+            }).then(function(appRunner) {
+              hideLoading();
+              return appRunner.runApp();
+            }).catch(function(error) {
+              console.error('Flutter initialization error:', error);
+              hideLoading();
+              // Show a fallback message
+              document.body.innerHTML = '<div style="text-align: center; padding: 50px;"><h2>Yemen Hybrid App</h2><p>Loading application...</p><p>If this message persists, please refresh the page.</p></div>';
+            });
+          } else {
+            // Retry after a short delay
+            setTimeout(initializeFlutter, 200);
+          }
+        } catch (error) {
+          console.error('Error during Flutter initialization:', error);
+          hideLoading();
+          document.body.innerHTML = '<div style="text-align: center; padding: 50px;"><h2>Yemen Hybrid App</h2><p>Application is starting up...</p><p>Please refresh the page if it doesn\'t load.</p></div>';
         }
-      });
+      }
+
+      // Start initialization
+      initializeFlutter();
     });
   </script>
 </body>
