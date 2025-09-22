@@ -49,7 +49,7 @@ class MyApp extends ConsumerWidget {
       ],
       
       // Router configuration
-      routerConfig: AppRouter.router,
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }

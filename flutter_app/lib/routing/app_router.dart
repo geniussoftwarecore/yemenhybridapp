@@ -1,12 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/splash/splash_page.dart';
 import '../features/auth/login_page.dart';
+import '../features/auth/role_gate.dart';
+import '../features/auth/providers/auth_provider.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../core/widgets/app_shell.dart';
 
-class AppRouter {
-  static GoRouter router = GoRouter(
+// Router provider that can access auth state
+final routerProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authProvider);
+  
+  return GoRouter(
     initialLocation: '/splash',
+    redirect: (context, state) {
+      final isAuthenticated = authState.isAuthenticated;
+      final isLoading = authState.isLoading;
+      final currentPath = state.matchedLocation;
+      
+      // Don't redirect while loading
+      if (isLoading) return null;
+      
+      // If accessing dashboard routes without auth, redirect to login
+      if (currentPath.startsWith('/dashboard') && !isAuthenticated) {
+        return '/login';
+      }
+      
+      // If accessing login while authenticated, redirect to gate
+      if (currentPath == '/login' && isAuthenticated) {
+        return '/gate';
+      }
+      
+      return null; // No redirect needed
+    },
     routes: [
       GoRoute(
         path: '/splash',
@@ -21,15 +48,26 @@ class AppRouter {
       GoRoute(
         path: '/gate',
         name: 'gate',
-        builder: (context, state) => const GateScreen(),
+        builder: (context, state) => const RoleGate(),
       ),
-      GoRoute(
-        path: '/dashboard/:role',
-        name: 'dashboard',
-        builder: (context, state) {
-          final role = state.pathParameters['role'] ?? 'admin';
-          return DashboardScreen(role: role);
+      ShellRoute(
+        builder: (context, state, child) {
+          final role = state.pathParameters['role'] ?? 'engineer';
+          return AppShell(
+            userRole: role,
+            child: child,
+          );
         },
+        routes: [
+          GoRoute(
+            path: '/dashboard/:role',
+            name: 'dashboard',
+            builder: (context, state) {
+              final role = state.pathParameters['role'] ?? 'engineer';
+              return DashboardScreen(role: role);
+            },
+          ),
+        ],
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
@@ -50,38 +88,13 @@ class AppRouter {
       ),
     ),
   );
+});
+
+// Legacy class for backward compatibility
+class AppRouter {
+  // This is now deprecated - use routerProvider instead
+  static GoRouter get router => throw UnsupportedError(
+    'Use routerProvider instead of AppRouter.router'
+  );
 }
 
-// Placeholder gate screen
-class GateScreen extends StatelessWidget {
-  const GateScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Welcome Gate'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/dashboard/admin'),
-              child: const Text('Admin Dashboard'),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () => context.go('/dashboard/sales'),
-              child: const Text('Sales Dashboard'),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () => context.go('/dashboard/engineer'),
-              child: const Text('Engineer Dashboard'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

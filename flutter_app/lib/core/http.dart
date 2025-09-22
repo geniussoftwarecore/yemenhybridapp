@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'env.dart';
+import 'env/env.dart';
 import 'services/toast_service.dart';
 
 // HTTP client provider
