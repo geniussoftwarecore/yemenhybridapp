@@ -31,7 +31,7 @@ async def create_test_users(db: AsyncSession) -> dict:
     users_data = [
         {
             "full_name": "Admin User",
-            "email": "admin@yemenhybrid.com",
+            "email": "admin@example.com",
             "phone": "+967-1-234-567",
             "role": UserRole.admin,
             "password_hash": hashed_password,
@@ -39,7 +39,7 @@ async def create_test_users(db: AsyncSession) -> dict:
         },
         {
             "full_name": "Sales Representative", 
-            "email": "sales@yemenhybrid.com",
+            "email": "sales@example.com",
             "phone": "+967-1-234-568",
             "role": UserRole.sales,
             "password_hash": hashed_password,
@@ -47,7 +47,7 @@ async def create_test_users(db: AsyncSession) -> dict:
         },
         {
             "full_name": "Service Engineer",
-            "email": "engineer@yemenhybrid.com", 
+            "email": "eng@example.com", 
             "phone": "+967-1-234-569",
             "role": UserRole.engineer,
             "password_hash": hashed_password,
@@ -471,9 +471,9 @@ async def seed_data():
         print("✅ COMPREHENSIVE DATA SEEDING COMPLETED SUCCESSFULLY!")
         print("=" * 70)
         print("\n🔐 Test Users Created:")
-        print("   • admin@yemenhybrid.com (Admin)")
-        print("   • sales@yemenhybrid.com (Sales)")  
-        print("   • engineer@yemenhybrid.com (Engineer)")
+        print("   • admin@example.com (Admin)")
+        print("   • sales@example.com (Sales)")  
+        print("   • eng@example.com (Engineer)")
         print("   📧 Password for all users: Passw0rd!")
         
         print("\n📊 Sample Data Created:")

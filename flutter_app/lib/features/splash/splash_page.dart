@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../core/env/env.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -20,15 +20,13 @@ class _SplashPageState extends State<SplashPage> {
   _performHealthCheck() async {
     try {
       final dio = Dio();
-      final apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000/api/v1';
-      final baseUrl = apiUrl.replaceAll('/api/v1', ''); // Get base URL for /health
+      final baseUrl = Env.apiBaseUrl;
       
       // Enforce strict 3-second timeout using Future.any
       await Future.any([
         dio.get(
           '$baseUrl/health',
           options: Options(
-            connectTimeout: const Duration(seconds: 3),
             sendTimeout: const Duration(seconds: 3),
             receiveTimeout: const Duration(seconds: 3),
           ),

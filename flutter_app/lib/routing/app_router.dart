@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/splash/splash_page.dart';
-import '../features/auth/login_screen.dart';
+import '../features/auth/login_page.dart';
 import '../features/dashboard/dashboard_screen.dart';
 
 class AppRouter {
@@ -16,7 +16,7 @@ class AppRouter {
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
         path: '/gate',
