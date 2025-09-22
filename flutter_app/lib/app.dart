@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'routing/app_router.dart';
+import 'core/theme.dart';
 import 'core/i18n/app_localizations.dart';
 
 class MyApp extends ConsumerWidget {
@@ -11,8 +12,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'Yemen Hybrid',
-      debugShowCheckedModeBanner: false,
-      
+
       // Material 3 theme
       theme: ThemeData(
         useMaterial3: true,
@@ -22,7 +22,7 @@ class MyApp extends ConsumerWidget {
           elevation: 2,
         ),
       ),
-      
+
       // Dark theme
       darkTheme: ThemeData(
         useMaterial3: true,
@@ -35,7 +35,7 @@ class MyApp extends ConsumerWidget {
           elevation: 2,
         ),
       ),
-      
+
       // Localization support (Arabic & English)
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -47,7 +47,7 @@ class MyApp extends ConsumerWidget {
         Locale('en'), // English
         Locale('ar'), // Arabic
       ],
-      
+
       // Router configuration
       routerConfig: ref.watch(routerProvider),
     );

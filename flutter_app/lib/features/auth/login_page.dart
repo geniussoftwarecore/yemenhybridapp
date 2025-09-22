@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../shared/providers/auth_state.dart';
+import '../../core/i18n/app_localizations.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -55,12 +56,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         }
       } else {
         setState(() {
-          _errorMessage = result['error'] ?? 'Login failed';
+          _errorMessage = result['error'] ?? (AppLocalizations.of(context)?.loginError ?? 'Login failed');
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'An unexpected error occurred';
+        _errorMessage = AppLocalizations.of(context)?.error ?? 'An unexpected error occurred';
       });
     } finally {
       if (mounted) {
@@ -99,10 +100,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             color: Colors.blue,
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'Yemen Hybrid',
+                          Text(
+                            AppLocalizations.of(context)?.appTitle ?? 'Yemen Hybrid',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                             ),
@@ -114,15 +115,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             enabled: !_isLoading,
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
-                              hintText: 'Enter your email',
-                              prefixIcon: Icon(Icons.email),
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)?.email ?? 'Email',
+                              hintText: AppLocalizations.of(context)?.emailHint ?? 'Enter your email',
+                              prefixIcon: const Icon(Icons.email),
+                              border: const OutlineInputBorder(),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter your email';
+                                return AppLocalizations.of(context)?.email ?? 'Please enter your email';
                               }
                               if (!value.contains('@')) {
                                 return 'Please enter a valid email';
@@ -137,15 +138,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             controller: _passwordController,
                             obscureText: true,
                             enabled: !_isLoading,
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                              hintText: 'Enter your password',
-                              prefixIcon: Icon(Icons.lock),
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)?.password ?? 'Password',
+                              hintText: AppLocalizations.of(context)?.passwordHint ?? 'Enter your password',
+                              prefixIcon: const Icon(Icons.lock),
+                              border: const OutlineInputBorder(),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
+                                return AppLocalizations.of(context)?.password ?? 'Please enter your password';
                               }
                               if (value.length < 6) {
                                 return 'Password must be at least 6 characters';
@@ -173,9 +174,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text(
-                                    'Sign In',
-                                    style: TextStyle(
+                                : Text(
+                                    AppLocalizations.of(context)?.loginButton ?? 'Sign In',
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
