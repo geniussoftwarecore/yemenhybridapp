@@ -177,7 +177,7 @@ class DashboardService {
     if (statusData != null) {
       return statusData
           .where((item) => ['pending', 'in_progress'].contains(item['status']?.toLowerCase()))
-          .fold(0, (sum, item) => sum + (item['count'] ?? 0));
+          .fold<int>(0, (sum, item) => sum + (item['count'] as int? ?? 0));
     }
     return 8; // Fallback
   }
@@ -238,7 +238,7 @@ class DashboardService {
     if (statusData != null) {
       return statusData
           .where((item) => !['completed', 'cancelled'].contains(item['status']?.toLowerCase()))
-          .fold(0, (sum, item) => sum + (item['count'] ?? 0));
+          .fold<int>(0, (sum, item) => sum + (item['count'] as int? ?? 0));
     }
     return 47; // Fallback
   }

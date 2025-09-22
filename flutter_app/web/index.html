@@ -56,8 +56,11 @@
         }
       }
 
-      // Use the official Flutter loader (compatible with dev mode)
+      // Initialize Flutter
       _flutter.loader.load({
+        serviceWorker: {
+          serviceWorkerVersion: null,
+        },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {
             hideLoading();
