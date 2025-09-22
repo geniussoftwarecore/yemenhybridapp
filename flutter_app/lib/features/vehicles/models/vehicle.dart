@@ -10,7 +10,8 @@ class Vehicle {
   final String model;
   final int? year;
   final String? color;
-  final String? engine;
+  final int? odometer;
+  final String? hybridType;
   final String? notes;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -26,7 +27,8 @@ class Vehicle {
     required this.model,
     this.year,
     this.color,
-    this.engine,
+    this.odometer,
+    this.hybridType,
     this.notes,
     this.createdAt,
     this.updatedAt,
@@ -37,13 +39,14 @@ class Vehicle {
     return Vehicle(
       id: json['id'],
       customerId: json['customer_id'],
-      plate: json['plate'] ?? '',
+      plate: json['plate_no'] ?? json['plate'] ?? '',
       vin: json['vin'],
       make: json['make'] ?? '',
       model: json['model'] ?? '',
       year: json['year'],
       color: json['color'],
-      engine: json['engine'],
+      odometer: json['odometer'],
+      hybridType: json['hybrid_type'],
       notes: json['notes'],
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at'])
@@ -62,13 +65,14 @@ class Vehicle {
     return {
       if (id != null) 'id': id,
       'customer_id': customerId,
-      'plate': plate,
+      'plate_no': plate,
       'vin': vin,
       'make': make,
       'model': model,
       'year': year,
       'color': color,
-      'engine': engine,
+      'odometer': odometer,
+      'hybrid_type': hybridType,
       'notes': notes,
     };
   }
@@ -82,7 +86,8 @@ class Vehicle {
     String? model,
     int? year,
     String? color,
-    String? engine,
+    int? odometer,
+    String? hybridType,
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -97,7 +102,8 @@ class Vehicle {
       model: model ?? this.model,
       year: year ?? this.year,
       color: color ?? this.color,
-      engine: engine ?? this.engine,
+      odometer: odometer ?? this.odometer,
+      hybridType: hybridType ?? this.hybridType,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -106,6 +112,32 @@ class Vehicle {
   }
 
   String get displayName => '$make $model - $plate';
+}
+
+class VehicleListResponse {
+  final List<Vehicle> items;
+  final int total;
+  final int page;
+  final int size;
+  final int pages;
+
+  VehicleListResponse({
+    required this.items,
+    required this.total,
+    required this.page,
+    required this.size,
+    required this.pages,
+  });
+
+  factory VehicleListResponse.fromJson(Map<String, dynamic> json) {
+    return VehicleListResponse(
+      items: (json['items'] as List).map((item) => Vehicle.fromJson(item)).toList(),
+      total: json['total'],
+      page: json['page'],
+      size: json['size'],
+      pages: json['pages'],
+    );
+  }
 }
 
 class VehicleSearchFilters {

@@ -52,7 +52,7 @@ async def get_vehicles(
     
     # Get total count
     total_result = await db.execute(count_query)
-    total = total_result.scalar()
+    total = total_result.scalar() or 0
     
     # Apply pagination
     offset = (page - 1) * size
@@ -63,10 +63,10 @@ async def get_vehicles(
     vehicles = result.scalars().all()
     
     # Calculate pagination info
-    pages = math.ceil(total / size)
+    pages = math.ceil(total / size) if total > 0 else 1
     
     return VehicleListResponse(
-        items=vehicles,
+        items=[VehicleResponse.model_validate(vehicle) for vehicle in vehicles],
         total=total,
         page=page,
         size=size,

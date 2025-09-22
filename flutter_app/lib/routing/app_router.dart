@@ -9,6 +9,9 @@ import '../features/dashboard/dashboard_screen.dart';
 import '../features/customers/customers_list_page.dart';
 import '../features/customers/screens/customer_details_page.dart';
 import '../features/customers/screens/customer_form_page.dart';
+import '../features/vehicles/vehicles_list_page.dart';
+import '../features/vehicles/screens/vehicle_details_page.dart';
+import '../features/vehicles/screens/vehicle_form_screen.dart';
 import '../core/widgets/app_shell.dart';
 
 // Router provider that can access auth state
@@ -26,7 +29,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isLoading) return null;
       
       // If accessing protected routes without auth, redirect to login
-      if ((currentPath.startsWith('/dashboard') || currentPath.startsWith('/customers')) && !isAuthenticated) {
+      if ((currentPath.startsWith('/dashboard') || currentPath.startsWith('/customers') || currentPath.startsWith('/vehicles')) && !isAuthenticated) {
         return '/login';
       }
       
@@ -94,6 +97,34 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) {
               final customerId = state.pathParameters['id']!;
               return CustomerFormPage(customerId: customerId);
+            },
+          ),
+          GoRoute(
+            path: '/vehicles',
+            name: 'vehicles',
+            builder: (context, state) => const VehiclesListPage(),
+          ),
+          GoRoute(
+            path: '/vehicles/new',
+            name: 'vehicle-new',
+            builder: (context, state) => const VehicleFormScreen(),
+          ),
+          GoRoute(
+            path: '/vehicles/:id',
+            name: 'vehicle-details',
+            builder: (context, state) {
+              final vehicleIdStr = state.pathParameters['id']!;
+              final vehicleId = int.parse(vehicleIdStr);
+              return VehicleDetailsPage(vehicleId: vehicleId);
+            },
+          ),
+          GoRoute(
+            path: '/vehicles/:id/edit',
+            name: 'vehicle-edit',
+            builder: (context, state) {
+              final vehicleIdStr = state.pathParameters['id']!;
+              final vehicleId = int.parse(vehicleIdStr);
+              return VehicleFormScreen(vehicleId: vehicleId);
             },
           ),
         ],

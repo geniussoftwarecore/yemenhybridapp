@@ -9,11 +9,13 @@ import '../../customers/providers/customer_provider.dart';
 class VehicleFormScreen extends ConsumerStatefulWidget {
   final Vehicle? vehicle;
   final int? preselectedCustomerId;
+  final int? vehicleId;
 
   const VehicleFormScreen({
     super.key, 
     this.vehicle,
     this.preselectedCustomerId,
+    this.vehicleId,
   });
 
   @override
@@ -28,7 +30,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   final _modelController = TextEditingController();
   final _yearController = TextEditingController();
   final _colorController = TextEditingController();
-  final _engineController = TextEditingController();
+  final _odometerController = TextEditingController();
+  final _hybridTypeController = TextEditingController();
   final _notesController = TextEditingController();
 
   int? _selectedCustomerId;
@@ -45,14 +48,20 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   }
 
   void _populateForm() {
-    final vehicle = widget.vehicle!;
+    if (widget.vehicle != null) {
+      _populateFormWithVehicle(widget.vehicle!);
+    }
+  }
+  
+  void _populateFormWithVehicle(Vehicle vehicle) {
     _plateController.text = vehicle.plate;
     _vinController.text = vehicle.vin ?? '';
     _makeController.text = vehicle.make;
     _modelController.text = vehicle.model;
     _yearController.text = vehicle.year?.toString() ?? '';
     _colorController.text = vehicle.color ?? '';
-    _engineController.text = vehicle.engine ?? '';
+    _odometerController.text = vehicle.odometer?.toString() ?? '';
+    _hybridTypeController.text = vehicle.hybridType ?? '';
     _notesController.text = vehicle.notes ?? '';
     _selectedCustomerId = vehicle.customerId;
   }
@@ -65,7 +74,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
     _modelController.dispose();
     _yearController.dispose();
     _colorController.dispose();
-    _engineController.dispose();
+    _odometerController.dispose();
+    _hybridTypeController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -73,8 +83,39 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    
+    // If vehicleId is provided but no vehicle, fetch it
+    if (widget.vehicleId != null && widget.vehicle == null) {
+      final vehicleAsync = ref.watch(vehicleProvider(widget.vehicleId!));
+      return vehicleAsync.when(
+        data: (vehicle) => _buildForm(vehicle),
+        loading: () => Scaffold(
+          appBar: AppBar(title: const Text('Loading...')),
+          body: const Center(child: CircularProgressIndicator()),
+        ),
+        error: (error, _) => Scaffold(
+          appBar: AppBar(title: const Text('Error')),
+          body: Center(child: Text('Error loading vehicle: $error')),
+        ),
+      );
+    }
+    
+    return _buildForm(widget.vehicle);
+  }
+  
+  Widget _buildForm(Vehicle? vehicle) {
+    final l10n = AppLocalizations.of(context)!;
     final customersAsync = ref.watch(customerAllProvider);
     final availableMakes = ref.watch(vehicleMakesProvider);
+    
+    // Update form if we just loaded the vehicle
+    if (vehicle != null && widget.vehicle == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _populateFormWithVehicle(vehicle);
+        }
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -286,16 +327,44 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: TextFormField(
-                            controller: _engineController,
+                            controller: _odometerController,
                             decoration: const InputDecoration(
-                              labelText: 'Engine',
-                              prefixIcon: Icon(Icons.settings),
+                              labelText: 'Odometer (km)',
+                              prefixIcon: Icon(Icons.speed),
                               border: OutlineInputBorder(),
-                              hintText: 'e.g. 2.0L',
+                              hintText: 'Current mileage',
                             ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                final odometer = int.tryParse(value);
+                                if (odometer == null || odometer < 0) {
+                                  return 'Invalid odometer reading';
+                                }
+                              }
+                              return null;
+                            },
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _hybridTypeController.text.isNotEmpty ? _hybridTypeController.text : null,
+                      decoration: const InputDecoration(
+                        labelText: 'Hybrid Type',
+                        prefixIcon: Icon(Icons.eco),
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'Full Hybrid', child: Text('Full Hybrid')),
+                        DropdownMenuItem(value: 'Mild Hybrid', child: Text('Mild Hybrid')),
+                        DropdownMenuItem(value: 'Plug-in Hybrid', child: Text('Plug-in Hybrid')),
+                        DropdownMenuItem(value: 'Conventional', child: Text('Conventional')),
+                      ],
+                      onChanged: (value) {
+                        _hybridTypeController.text = value ?? '';
+                      },
                     ),
                   ],
                 ),
@@ -370,7 +439,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
         model: _modelController.text.trim(),
         year: _yearController.text.trim().isNotEmpty ? int.tryParse(_yearController.text.trim()) : null,
         color: _colorController.text.trim().isNotEmpty ? _colorController.text.trim() : null,
-        engine: _engineController.text.trim().isNotEmpty ? _engineController.text.trim() : null,
+        odometer: _odometerController.text.trim().isNotEmpty ? int.tryParse(_odometerController.text.trim()) : null,
+        hybridType: _hybridTypeController.text.trim().isNotEmpty ? _hybridTypeController.text.trim() : null,
         notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
       );
 

@@ -11,13 +11,20 @@ final vehicleSearchFiltersProvider = StateProvider<VehicleSearchFilters>((ref) {
 final vehicleListProvider = FutureProvider<List<Vehicle>>((ref) async {
   final apiService = ref.read(vehicleApiServiceProvider);
   final filters = ref.watch(vehicleSearchFiltersProvider);
-  return apiService.getVehicles(filters: filters);
+  final response = await apiService.getVehicles(
+    page: filters.page ?? 1,
+    size: filters.limit ?? 10,
+    search: filters.query,
+    customerId: filters.customerId,
+  );
+  return response.items;
 });
 
 // Unfiltered vehicle list provider for forms and dropdowns
 final vehicleAllProvider = FutureProvider<List<Vehicle>>((ref) async {
   final apiService = ref.read(vehicleApiServiceProvider);
-  return apiService.getVehicles();
+  final response = await apiService.getVehicles(size: 1000); // Large size for dropdown
+  return response.items;
 });
 
 // Vehicle notifier for CRUD operations
@@ -35,8 +42,8 @@ class VehicleNotifier extends StateNotifier<AsyncValue<List<Vehicle>>> {
   Future<void> _loadVehicles() async {
     try {
       state = const AsyncValue.loading();
-      final vehicles = await _apiService.getVehicles();
-      state = AsyncValue.data(vehicles);
+      final response = await _apiService.getVehicles(size: 1000);
+      state = AsyncValue.data(response.items);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -86,7 +93,8 @@ class VehicleNotifier extends StateNotifier<AsyncValue<List<Vehicle>>> {
 
   Future<List<Vehicle>> searchVehicles(String query) async {
     try {
-      return await _apiService.searchVehicles(query);
+      final response = await _apiService.searchVehicles(query);
+      return response.items;
     } catch (error) {
       rethrow;
     }
@@ -94,7 +102,8 @@ class VehicleNotifier extends StateNotifier<AsyncValue<List<Vehicle>>> {
 
   Future<List<Vehicle>> getVehiclesByCustomer(int customerId) async {
     try {
-      return await _apiService.getVehiclesByCustomer(customerId);
+      final response = await _apiService.getVehiclesByCustomer(customerId);
+      return response.items;
     } catch (error) {
       rethrow;
     }

@@ -62,15 +62,8 @@ class VehicleApiService {
     await _httpClient.delete('/api/v1/vehicles/$id');
   }
 
-  Future<List<Vehicle>> searchVehicles(String query) async {
-    final response = await _httpClient.get(
-      '/api/v1/vehicles',
-      queryParameters: {'q': query}, // Use 'q' to match backend
-    );
-
-    return (response.data as List)
-        .map((json) => Vehicle.fromJson(json))
-        .toList();
+  Future<VehicleListResponse> searchVehicles(String query) async {
+    return getVehicles(search: query);
   }
 
   Future<VehicleListResponse> searchByPlate(String plate) async {
@@ -81,14 +74,7 @@ class VehicleApiService {
     return getVehicles(search: vin);
   }
 
-  Future<List<Vehicle>> getVehiclesByCustomer(int customerId) async {
-    final response = await _httpClient.get(
-      '/api/v1/vehicles',
-      queryParameters: {'customer_id': customerId},
-    );
-
-    return (response.data as List)
-        .map((json) => Vehicle.fromJson(json))
-        .toList();
+  Future<VehicleListResponse> getVehiclesByCustomer(int customerId) async {
+    return getVehicles(customerId: customerId);
   }
 }
