@@ -5,6 +5,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/data_table_widget.dart';
 import '../widgets/quick_action_button.dart';
+import '../../../shared/services/dashboard_service.dart';
 
 class EngineerDashboard extends ConsumerStatefulWidget {
   const EngineerDashboard({super.key});
@@ -14,36 +15,47 @@ class EngineerDashboard extends ConsumerStatefulWidget {
 }
 
 class _EngineerDashboardState extends ConsumerState<EngineerDashboard> {
-  bool _isLoading = false;
-  bool _isTableLoading = false;
+  bool _isLoading = true;
+  bool _isTableLoading = true;
   int _currentPage = 1;
   final int _totalPages = 3;
   String _searchQuery = '';
 
-  // Sample data - replace with actual data from providers
-  final List<Map<String, dynamic>> _workOrders = [
-    {
-      'id': 'WO-001',
-      'status': 'In Progress',
-      'plate': 'ABC-123',
-      'make_model': 'Toyota Camry',
-      'scheduled_at': '2025-09-21 14:00',
-    },
-    {
-      'id': 'WO-002', 
-      'status': 'Pending',
-      'plate': 'DEF-456',
-      'make_model': 'Honda Civic',
-      'scheduled_at': '2025-09-22 09:30',
-    },
-    {
-      'id': 'WO-003',
-      'status': 'Waiting Parts',
-      'plate': 'GHI-789',
-      'make_model': 'BMW X5',
-      'scheduled_at': '2025-09-23 11:00',
-    },
-  ];
+  // Data from service with fallback
+  Map<String, dynamic> _metrics = {};
+  List<Map<String, dynamic>> _workOrders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final dashboardService = ref.read(dashboardServiceProvider);
+    
+    setState(() {
+      _isLoading = true;
+      _isTableLoading = true;
+    });
+
+    try {
+      final metrics = await dashboardService.getEngineerMetrics();
+      final workOrders = await dashboardService.getEngineerWorkOrders();
+      
+      setState(() {
+        _metrics = metrics;
+        _workOrders = workOrders;
+        _isLoading = false;
+        _isTableLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _isTableLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +116,7 @@ class _EngineerDashboardState extends ConsumerState<EngineerDashboard> {
       children: [
         MetricCard(
           title: 'My Open WOs',
-          value: '8',
+          value: '${_metrics['my_open_wos_today'] ?? 8}',
           icon: Icons.build_circle,
           color: Colors.blue,
           subtitle: '+2 from yesterday',
@@ -115,7 +127,7 @@ class _EngineerDashboardState extends ConsumerState<EngineerDashboard> {
         ),
         MetricCard(
           title: 'Awaiting Approval',
-          value: '3',
+          value: '${_metrics['awaiting_approval'] ?? 3}',
           icon: Icons.pending_actions,
           color: Colors.orange,
           subtitle: 'Pending review',
@@ -126,7 +138,7 @@ class _EngineerDashboardState extends ConsumerState<EngineerDashboard> {
         ),
         MetricCard(
           title: 'In Progress',
-          value: '5',
+          value: '${_metrics['in_progress'] ?? 5}',
           icon: Icons.work,
           color: Colors.green,
           subtitle: 'Active jobs',
@@ -279,16 +291,7 @@ class _EngineerDashboardState extends ConsumerState<EngineerDashboard> {
   }
 
   Future<void> _handleRefresh() async {
-    setState(() {
-      _isLoading = true;
-    });
-    
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-    
-    setState(() {
-      _isLoading = false;
-    });
+    await _loadData();
   }
 
   Future<void> _handleTableRefresh() async {
