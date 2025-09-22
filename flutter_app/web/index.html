@@ -52,44 +52,188 @@
   </div>
 
   <script>
-    window.addEventListener('load', function() {
+    // Prevent Eruda conflicts with Flutter initialization
+    (function() {
+      // Store original console methods before Eruda might override them
+      const originalConsole = {
+        log: console.log,
+        error: console.error,
+        warn: console.warn
+      };
+
+      // Initialization guards
+      let started = false;
+      let retryTimer = null;
+
       // Hide loading indicator when Flutter loads
       function hideLoading() {
-        const loading = document.getElementById('loading');
-        if (loading) {
-          loading.style.display = 'none';
+        try {
+          const loading = document.getElementById('loading');
+          if (loading) {
+            loading.style.display = 'none';
+          }
+        } catch (e) {
+          originalConsole.warn('Could not hide loading indicator:', e);
         }
       }
 
-      // Simple Flutter initialization with error handling
+      // Clear any pending retry timers
+      function clearRetryTimer() {
+        if (retryTimer) {
+          clearTimeout(retryTimer);
+          retryTimer = null;
+        }
+      }
+
+      // Show user-friendly error message
+      function showErrorMessage() {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'text-align: center; padding: 50px; font-family: Arial, sans-serif;';
+        errorDiv.innerHTML = `
+          <h2>Yemen Hybrid App</h2>
+          <p>The application is starting up...</p>
+          <button onclick="window.location.reload()" style="
+            padding: 10px 20px; 
+            margin-top: 20px; 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer;
+          ">Refresh Page</button>
+        `;
+        document.body.innerHTML = '';
+        document.body.appendChild(errorDiv);
+      }
+
+      // Robust Flutter initialization with Eruda compatibility
       function initializeFlutter() {
+        // Idempotent guard - prevent double initialization
+        if (started) {
+          return;
+        }
+        started = true;
+        clearRetryTimer();
+
         try {
-          if (typeof _flutter !== 'undefined' && _flutter.loader && typeof _flutter.loader.load === 'function') {
-            _flutter.loader.load().then(function(engineInitializer) {
-              return engineInitializer.initializeEngine();
-            }).then(function(appRunner) {
-              hideLoading();
-              return appRunner.runApp();
-            }).catch(function(error) {
-              console.error('Flutter initialization error:', error);
-              hideLoading();
-              // Show a fallback message
-              document.body.innerHTML = '<div style="text-align: center; padding: 50px;"><h2>Yemen Hybrid App</h2><p>Loading application...</p><p>If this message persists, please refresh the page.</p></div>';
-            });
+          // Check if Flutter loader is available with feature detection
+          if (typeof _flutter !== 'undefined' && _flutter.loader) {
+            // Support both loader APIs: loadEntrypoint (newer) and load (older)
+            const loadFn = _flutter.loader.loadEntrypoint || _flutter.loader.load;
+            
+            if (typeof loadFn === 'function') {
+              originalConsole.log('Starting Flutter initialization...');
+              
+              // Handle different loader APIs properly
+              if (_flutter.loader.loadEntrypoint) {
+                // Use loadEntrypoint API (newer Flutter)
+                loadFn({
+                  serviceWorker: {
+                    serviceWorkerVersion: null, // Disable service worker for development
+                  },
+                  onEntrypointLoaded: function(engineInitializer) {
+                    originalConsole.log('Flutter engine initializing...');
+                    engineInitializer.initializeEngine().then(function(appRunner) {
+                      originalConsole.log('Flutter app starting...');
+                      hideLoading();
+                      return appRunner.runApp();
+                    }).then(function() {
+                      originalConsole.log('✅ Flutter app started successfully');
+                      
+                      // Mark as initialized to prevent re-initialization
+                      window._flutterInitialized = true;
+                      
+                      // Emit custom event for debugging tools to hook into
+                      window.dispatchEvent(new CustomEvent('flutter-initialized'));
+                      
+                    }).catch(function(error) {
+                      originalConsole.error('Flutter initialization error:', error);
+                      started = false; // Allow retry on error
+                      hideLoading();
+                      showErrorMessage();
+                    });
+                  }
+                });
+              } else {
+                // Use load API (older Flutter)
+                loadFn().then(function(engineInitializer) {
+                  originalConsole.log('Flutter engine initializing...');
+                  return engineInitializer.initializeEngine();
+                }).then(function(appRunner) {
+                  originalConsole.log('Flutter app starting...');
+                  hideLoading();
+                  return appRunner.runApp();
+                }).then(function() {
+                  originalConsole.log('✅ Flutter app started successfully');
+                  
+                  // Mark as initialized to prevent re-initialization
+                  window._flutterInitialized = true;
+                  
+                  // Emit custom event for debugging tools to hook into
+                  window.dispatchEvent(new CustomEvent('flutter-initialized'));
+                  
+                }).catch(function(error) {
+                  originalConsole.error('Flutter initialization error:', error);
+                  started = false; // Allow retry on error
+                  hideLoading();
+                  showErrorMessage();
+                });
+              }
+            } else {
+              // Neither loader API found, retry
+              started = false; // Reset for retry
+              scheduleRetry();
+            }
           } else {
-            // Retry after a short delay
-            setTimeout(initializeFlutter, 200);
+            // Flutter object not ready yet, retry
+            started = false; // Reset for retry
+            scheduleRetry();
           }
         } catch (error) {
-          console.error('Error during Flutter initialization:', error);
+          originalConsole.error('Critical error during Flutter initialization:', error);
+          started = false; // Reset for retry
           hideLoading();
-          document.body.innerHTML = '<div style="text-align: center; padding: 50px;"><h2>Yemen Hybrid App</h2><p>Application is starting up...</p><p>Please refresh the page if it doesn\'t load.</p></div>';
+          
+          // Fallback error display
+          const fallbackDiv = document.createElement('div');
+          fallbackDiv.style.cssText = 'text-align: center; padding: 50px; color: #333;';
+          fallbackDiv.innerHTML = `
+            <h2>Yemen Hybrid App</h2>
+            <p>Starting application...</p>
+            <small>If this message persists, please refresh the page</small>
+          `;
+          document.body.innerHTML = '';
+          document.body.appendChild(fallbackDiv);
         }
       }
 
-      // Start initialization
-      initializeFlutter();
-    });
+      // Schedule retry with exponential backoff
+      function scheduleRetry() {
+        const retryDelay = arguments[0] || 100;
+        if (retryDelay < 5000) {
+          originalConsole.log('Flutter loader not ready, retrying in', retryDelay, 'ms');
+          retryTimer = setTimeout(function() {
+            initializeFlutter();
+          }, retryDelay);
+          
+          // Exponential backoff for next potential retry
+          retryTimer.nextDelay = retryDelay * 1.5;
+        } else {
+          originalConsole.error('Flutter loader failed to load after multiple retries');
+          hideLoading();
+          document.body.innerHTML = '<div style="text-align: center; padding: 50px;"><h2>Yemen Hybrid App</h2><p>Unable to load application. Please refresh the page.</p></div>';
+        }
+      }
+
+      // Start initialization when DOM is ready (single trigger point)
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeFlutter);
+      } else {
+        // DOM already loaded
+        initializeFlutter();
+      }
+
+    })();
   </script>
 </body>
 </html>
