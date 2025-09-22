@@ -86,7 +86,7 @@ class Vehicle {
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Customer? customer,
+    // Customer? customer,
   }) {
     return Vehicle(
       id: id ?? this.id,
@@ -101,7 +101,7 @@ class Vehicle {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      customer: customer ?? this.customer,
+      // customer: customer ?? this.customer,
     );
   }
 
