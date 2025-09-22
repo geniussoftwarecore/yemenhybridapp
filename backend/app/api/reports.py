@@ -69,8 +69,8 @@ async def get_kpis(
         {
             "part_id": part.id,
             "name": part.name,
-            "stock": int(part.stock) if part.stock is not None else 0,
-            "min_stock": int(part.min_stock) if part.min_stock is not None else 0
+            "stock": part.stock if part.stock is not None else 0,
+            "min_stock": part.min_stock if part.min_stock is not None else 0
         }
         for part in low_stock_result.scalars().all()
     ]
@@ -150,7 +150,7 @@ async def get_workorder_report(
                 "created_at": wo.created_at.isoformat(),
                 "customer_id": wo.customer_id,
                 "vehicle_id": wo.vehicle_id,
-                "final_cost": float(wo.final_cost) if wo.final_cost is not None else 0.0
+                "final_cost": wo.final_cost if wo.final_cost is not None else 0.0
             }
             for wo in work_orders
         ]
@@ -177,9 +177,9 @@ async def get_inventory_report(
     total_value = 0
     
     for part in parts:
-        stock = int(part.stock) if part.stock is not None else 0
-        min_stock = int(part.min_stock) if part.min_stock is not None else 0
-        buy_price = float(part.buy_price) if part.buy_price is not None else 0.0
+        stock = part.stock if part.stock is not None else 0
+        min_stock = part.min_stock if part.min_stock is not None else 0
+        buy_price = part.buy_price if part.buy_price is not None else 0.0
         
         if stock <= min_stock:
             low_stock_count += 1
@@ -203,10 +203,10 @@ async def get_inventory_report(
                 "id": part.id,
                 "name": part.name,
                 "part_no": part.part_no,
-                "stock": int(part.stock) if part.stock is not None else 0,
-                "min_stock": int(part.min_stock) if part.min_stock is not None else 0,
-                "buy_price": float(part.buy_price) if part.buy_price is not None else 0.0,
-                "sell_price": float(part.sell_price) if part.sell_price is not None else 0.0,
+                "stock": part.stock if part.stock is not None else 0,
+                "min_stock": part.min_stock if part.min_stock is not None else 0,
+                "buy_price": part.buy_price if part.buy_price is not None else 0.0,
+                "sell_price": part.sell_price if part.sell_price is not None else 0.0,
                 "supplier": part.supplier,
                 "location": part.location
             }
@@ -273,7 +273,7 @@ async def get_customer_report(
                 "id": customer.id,
                 "name": customer.name,
                 "work_order_count": customer.work_order_count,
-                "total_revenue": float(customer.total_revenue),
+                "total_revenue": customer.total_revenue,
                 "created_at": customer.created_at.isoformat()
             }
             for customer in customers
