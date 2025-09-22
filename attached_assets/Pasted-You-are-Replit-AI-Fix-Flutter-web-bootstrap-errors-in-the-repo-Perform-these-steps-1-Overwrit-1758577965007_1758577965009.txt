@@ -1,0 +1,64 @@
+You are Replit AI. Fix Flutter web bootstrap errors in the repo. Perform these steps:
+
+1) Overwrite file flutter_app/web/index.html with the canonical template below (disable SW in dev, use loadEntrypoint, html renderer, base href):
+---BEGIN FILE---
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yemen Hybrid</title>
+  <base href="/" />
+  <meta name="renderer" content="html" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <script>const serviceWorkerVersion = null;</script>
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <script>
+    window.addEventListener('load', function () {
+      if (!window._flutter || !window._flutter.loader) {
+        console.error('flutter.js not loaded');
+        return;
+      }
+      window._flutter.loader.loadEntrypoint({
+        entrypointUrl: 'main.dart.js',
+        serviceWorker: { serviceWorkerVersion },
+        onEntrypointLoaded: function (engineInitializer) {
+          if (!engineInitializer || !engineInitializer.initializeEngine) {
+            console.error('engineInitializer missing', engineInitializer);
+            return;
+          }
+          engineInitializer.initializeEngine({ renderer: 'html' })
+            .then(function (appRunner) { appRunner.runApp(); })
+            .catch(function (e) { console.error('Engine init failed', e); });
+        },
+      });
+    });
+  </script>
+</body>
+</html>
+---END FILE---
+
+2) If flutter_app/web/flutter.js or main.dart.js is missing, run:
+   cd flutter_app
+   flutter clean
+   flutter pub get
+   flutter build web --web-renderer html
+
+3) Instruct the user via console output:
+   - unregister any Service Workers in DevTools (Application → Service Workers → Unregister)
+   - clear site data and hard reload
+   - run `flutter run -d chrome --web-renderer html` locally for dev
+
+4) After changes, run a smoke check:
+   - check that GET / (web) returns index.html and Network shows 200 for flutter.js & main.dart.js
+   - open Console and ensure no `Cannot set properties of undefined` or `FlutterLoader.load requires _flutter.buildConfig`
+
+Print:
+- FILES UPDATED: flutter_app/web/index.html (and build performed if applicable)
+- SW STATUS: please unregister in browser if still registered
+- SMOKE: PASS/FAIL with console log excerpts
+Finally print: DONE:FIX-FLUTTER-BOOT

@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-store" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <script>const serviceWorkerVersion = "{{flutter_service_worker_version}}";</script>
+  <script>const serviceWorkerVersion = null;</script>
   <script src="flutter.js" defer></script>
 </head>
 <body>
@@ -19,7 +19,7 @@
         console.error('flutter.js not loaded');
         return;
       }
-      window._flutter.loader.load({
+      window._flutter.loader.loadEntrypoint({
         entrypointUrl: 'main.dart.js',
         serviceWorker: { serviceWorkerVersion },
         onEntrypointLoaded: function (engineInitializer) {
