@@ -1,4 +1,5 @@
-import '../../customers/models/customer.dart';
+// Temporarily commenting out import to fix circular dependencies
+// import '../../customers/models/customer.dart';
 
 class Vehicle {
   final int? id;
@@ -13,7 +14,8 @@ class Vehicle {
   final String? notes;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Customer? customer;
+  // Temporarily comment out complex type
+  // final Customer? customer;
 
   Vehicle({
     this.id,
@@ -28,7 +30,7 @@ class Vehicle {
     this.notes,
     this.createdAt,
     this.updatedAt,
-    this.customer,
+    // this.customer,
   });
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
@@ -49,9 +51,10 @@ class Vehicle {
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at'])
           : null,
-      customer: json['customer'] != null 
-          ? Customer.fromJson(json['customer'])
-          : null,
+      // Temporarily comment out complex fromJson call
+      // customer: json['customer'] != null 
+      //     ? Customer.fromJson(json['customer'])
+      //     : null,
     );
   }
 

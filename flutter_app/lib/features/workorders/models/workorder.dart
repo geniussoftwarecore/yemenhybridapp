@@ -1,7 +1,8 @@
 
-import '../customers/models/customer.dart';
-import '../vehicles/models/vehicle.dart';
-import '../auth/models/user.dart';
+// Temporarily commenting out imports to fix circular dependencies
+// import '../../customers/models/customer.dart';
+// import '../../vehicles/models/vehicle.dart';
+// import '../../auth/models/user.dart';
 
 enum WorkOrderStatus {
   pending,
@@ -95,9 +96,10 @@ class WorkOrder {
   final String? notes;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Customer? customer;
-  final Vehicle? vehicle;
-  final User? assignedUser;
+  // Temporarily comment out complex types
+  // final Customer? customer;
+  // final Vehicle? vehicle;
+  // final User? assignedUser;
   final List<WorkOrderService>? services;
   final List<WorkOrderMedia>? media;
 
@@ -117,9 +119,9 @@ class WorkOrder {
     this.notes,
     this.createdAt,
     this.updatedAt,
-    this.customer,
-    this.vehicle,
-    this.assignedUser,
+    // this.customer,
+    // this.vehicle,
+    // this.assignedUser,
     this.services,
     this.media,
   });
@@ -151,15 +153,16 @@ class WorkOrder {
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at'])
           : null,
-      customer: json['customer'] != null 
-          ? Customer.fromJson(json['customer'])
-          : null,
-      vehicle: json['vehicle'] != null 
-          ? Vehicle.fromJson(json['vehicle'])
-          : null,
-      assignedUser: json['assigned_user'] != null 
-          ? User.fromJson(json['assigned_user'])
-          : null,
+      // Temporarily comment out complex fromJson calls
+      // customer: json['customer'] != null 
+      //     ? Customer.fromJson(json['customer'])
+      //     : null,
+      // vehicle: json['vehicle'] != null 
+      //     ? Vehicle.fromJson(json['vehicle'])
+      //     : null,
+      // assignedUser: json['assigned_user'] != null 
+      //     ? User.fromJson(json['assigned_user'])
+      //     : null,
       services: json['services'] != null 
           ? (json['services'] as List).map((s) => WorkOrderService.fromJson(s)).toList()
           : null,

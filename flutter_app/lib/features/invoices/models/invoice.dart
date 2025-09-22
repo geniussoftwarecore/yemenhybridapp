@@ -1,5 +1,6 @@
-import '../workorders/models/workorder.dart';
-import '../customers/models/customer.dart';
+// Temporarily commenting out imports to fix circular dependencies
+// import '../../workorders/models/workorder.dart';
+// import '../../customers/models/customer.dart';
 
 enum InvoiceStatus {
   draft,
@@ -59,8 +60,9 @@ class Invoice {
   final String? pdfUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final WorkOrder? workOrder;
-  final Customer? customer;
+  // Temporarily comment out complex types
+  // final WorkOrder? workOrder;
+  // final Customer? customer;
   final List<InvoiceItem>? items;
 
   Invoice({
@@ -79,8 +81,8 @@ class Invoice {
     this.pdfUrl,
     this.createdAt,
     this.updatedAt,
-    this.workOrder,
-    this.customer,
+    // this.workOrder,
+    // this.customer,
     this.items,
   });
 
@@ -111,12 +113,13 @@ class Invoice {
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at'])
           : null,
-      workOrder: json['work_order'] != null 
-          ? WorkOrder.fromJson(json['work_order'])
-          : null,
-      customer: json['customer'] != null 
-          ? Customer.fromJson(json['customer'])
-          : null,
+      // Temporarily comment out complex fromJson calls
+      // workOrder: json['work_order'] != null 
+      //     ? WorkOrder.fromJson(json['work_order'])
+      //     : null,
+      // customer: json['customer'] != null 
+      //     ? Customer.fromJson(json['customer'])
+      //     : null,
       items: json['items'] != null 
           ? (json['items'] as List).map((i) => InvoiceItem.fromJson(i)).toList()
           : null,

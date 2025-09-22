@@ -1,6 +1,7 @@
-import '../customers/models/customer.dart';
-import '../vehicles/models/vehicle.dart';
-import '../workorders/models/workorder.dart';
+// Temporarily commenting out imports to fix circular dependencies
+// import '../../customers/models/customer.dart';
+// import '../../vehicles/models/vehicle.dart';
+// import '../../workorders/models/workorder.dart';
 
 enum BookingChannel {
   whatsapp,
@@ -113,9 +114,10 @@ class Booking {
   final String? notes;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Customer? customer;
-  final Vehicle? vehicle;
-  final WorkOrder? workOrder;
+  // Temporarily comment out complex types
+  // final Customer? customer;
+  // final Vehicle? vehicle;
+  // final WorkOrder? workOrder;
 
   Booking({
     this.id,
@@ -129,9 +131,9 @@ class Booking {
     this.notes,
     this.createdAt,
     this.updatedAt,
-    this.customer,
-    this.vehicle,
-    this.workOrder,
+    // this.customer,
+    // this.vehicle,
+    // this.workOrder,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -151,15 +153,16 @@ class Booking {
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at'])
           : null,
-      customer: json['customer'] != null 
-          ? Customer.fromJson(json['customer'])
-          : null,
-      vehicle: json['vehicle'] != null 
-          ? Vehicle.fromJson(json['vehicle'])
-          : null,
-      workOrder: json['work_order'] != null 
-          ? WorkOrder.fromJson(json['work_order'])
-          : null,
+      // Temporarily comment out complex fromJson calls
+      // customer: json['customer'] != null 
+      //     ? Customer.fromJson(json['customer'])
+      //     : null,
+      // vehicle: json['vehicle'] != null 
+      //     ? Vehicle.fromJson(json['vehicle'])
+      //     : null,
+      // workOrder: json['work_order'] != null 
+      //     ? WorkOrder.fromJson(json['work_order'])
+      //     : null,
     );
   }
 
