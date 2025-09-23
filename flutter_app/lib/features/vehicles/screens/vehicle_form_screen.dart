@@ -176,7 +176,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
                           return null;
                         },
                       ),
-                      loading: () => const DropdownButtonFormField<int>(
+                      loading: () => DropdownButtonFormField<int>(
                         decoration: InputDecoration(
                           labelText: 'Loading customers...',
                           prefixIcon: Icon(Icons.person),

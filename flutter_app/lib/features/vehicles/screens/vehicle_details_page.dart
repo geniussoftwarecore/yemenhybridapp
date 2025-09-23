@@ -222,7 +222,7 @@ class _VehicleDetailsPageState extends ConsumerState<VehicleDetailsPage> {
   }
 
   Widget _buildOwnerCard(Vehicle vehicle) {
-    final customerAsync = ref.watch(customerDetailProvider(vehicle.customerId));
+    final customerAsync = ref.watch(customerProvider(vehicle.customerId));
     
     return Card(
       child: Padding(

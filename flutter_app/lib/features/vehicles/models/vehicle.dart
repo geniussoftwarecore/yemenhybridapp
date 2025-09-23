@@ -114,31 +114,7 @@ class Vehicle {
   String get displayName => '$make $model - $plate';
 }
 
-class VehicleListResponse {
-  final List<Vehicle> items;
-  final int total;
-  final int page;
-  final int size;
-  final int pages;
-
-  VehicleListResponse({
-    required this.items,
-    required this.total,
-    required this.page,
-    required this.size,
-    required this.pages,
-  });
-
-  factory VehicleListResponse.fromJson(Map<String, dynamic> json) {
-    return VehicleListResponse(
-      items: (json['items'] as List).map((item) => Vehicle.fromJson(item)).toList(),
-      total: json['total'],
-      page: json['page'],
-      size: json['size'],
-      pages: json['pages'],
-    );
-  }
-}
+// VehicleListResponse moved to core/models/api_response.dart to avoid duplication
 
 class VehicleSearchFilters {
   final String? query;
