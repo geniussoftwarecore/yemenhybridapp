@@ -194,16 +194,15 @@ class WorkOrderApiService {
     return response.data['url'] ?? '';
   }
 
-  // Search and filtering
-  Future<List<WorkOrder>> searchWorkOrders(String query) async {
+  // Search and filtering - backend doesn't have dedicated search endpoint,
+  // so we simulate search by filtering the work orders list
+  Future<WorkOrderListResponse> searchWorkOrders(String query) async {
     final response = await _httpClient.get(
       '/api/v1/workorders',
-      queryParameters: {'q': query}, // Use 'q' to match backend standard
+      queryParameters: {'search': query}, // Simulated search via query parameter
     );
 
-    return (response.data as List)
-        .map((json) => WorkOrder.fromJson(json))
-        .toList();
+    return WorkOrderListResponse.fromJson(response.data);
   }
 
   Future<List<WorkOrder>> getMyWorkOrders(int userId) async {
@@ -212,19 +211,17 @@ class WorkOrderApiService {
       queryParameters: {'assigned_to': userId},
     );
 
-    return (response.data as List)
-        .map((json) => WorkOrder.fromJson(json))
-        .toList();
+    final listResponse = WorkOrderListResponse.fromJson(response.data);
+    return listResponse.items;
   }
 
   Future<List<WorkOrder>> getPendingApprovals() async {
     final response = await _httpClient.get(
       '/api/v1/workorders',
-      queryParameters: {'status': 'waiting_approval'},
+      queryParameters: {'status': 'awaiting_approval'},
     );
 
-    return (response.data as List)
-        .map((json) => WorkOrder.fromJson(json))
-        .toList();
+    final listResponse = WorkOrderListResponse.fromJson(response.data);
+    return listResponse.items;
   }
 }

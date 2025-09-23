@@ -155,7 +155,8 @@ class WorkOrderNotifier extends StateNotifier<AsyncValue<List<WorkOrder>>> {
 
   Future<List<WorkOrder>> searchWorkOrders(String query) async {
     try {
-      return await _apiService.searchWorkOrders(query);
+      final response = await _apiService.searchWorkOrders(query);
+      return response.items;
     } catch (error) {
       rethrow;
     }

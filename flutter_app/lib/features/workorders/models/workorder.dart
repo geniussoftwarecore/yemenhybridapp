@@ -70,7 +70,7 @@ class WorkOrder {
   final int? id;
   final int customerId;
   final int vehicleId;
-  final int createdBy;
+  final int? createdBy;
   final String? complaint;
   final WorkOrderStatus status;
   final double? estParts;
@@ -89,7 +89,7 @@ class WorkOrder {
     this.id,
     required this.customerId,
     required this.vehicleId,
-    required this.createdBy,
+    this.createdBy,
     this.complaint,
     this.status = WorkOrderStatus.newOrder,
     this.estParts,
@@ -138,13 +138,21 @@ class WorkOrder {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      if (id != null) 'id': id,
+    final json = {
       'customer_id': customerId,
       'vehicle_id': vehicleId,
       'complaint': complaint,
-      'notes': notes,
     };
+    
+    // Only include non-null optional fields
+    if (id != null) json['id'] = id;
+    if (createdBy != null) json['created_by'] = createdBy;
+    if (notes != null) json['notes'] = notes;
+    if (scheduledAt != null) json['scheduled_at'] = scheduledAt!.toIso8601String();
+    if (estParts != null) json['est_parts'] = estParts;
+    if (estLabor != null) json['est_labor'] = estLabor;
+    
+    return json;
   }
 }
 

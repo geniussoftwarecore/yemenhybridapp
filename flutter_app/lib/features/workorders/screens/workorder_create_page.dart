@@ -397,24 +397,14 @@ class _WorkOrderCreatePageState extends ConsumerState<WorkOrderCreatePage> {
       final workOrder = WorkOrder(
         customerId: _selectedCustomerId!,
         vehicleId: _selectedVehicleId!,
-        createdBy: 1, // TODO: Get from current user
         complaint: _complaintController.text.trim(),
         notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
         scheduledAt: _scheduledAt,
+        estParts: double.tryParse(_estPartsController.text),
+        estLabor: double.tryParse(_estLaborController.text),
       );
 
-      final createdWorkOrder = await ref.read(workOrderNotifierProvider.notifier).createWorkOrder(workOrder);
-
-      // If estimates were provided, update them
-      final parts = double.tryParse(_estPartsController.text);
-      final labor = double.tryParse(_estLaborController.text);
-      if (parts != null || labor != null) {
-        await ref.read(workOrderNotifierProvider.notifier).updateEstimate(
-          createdWorkOrder.id!,
-          estParts: parts,
-          estLabor: labor,
-        );
-      }
+      await ref.read(workOrderNotifierProvider.notifier).createWorkOrder(workOrder);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
