@@ -5,77 +5,63 @@
 // import '../../auth/models/user.dart';
 
 enum WorkOrderStatus {
-  pending,
+  newOrder,
+  awaitingApproval,
+  readyToStart,
   inProgress,
-  waitingParts,
-  waitingApproval,
-  waitingCustomer,
-  completed,
-  cancelled,
-  invoiced;
+  done,
+  closed;
 
   String get displayName {
     switch (this) {
-      case WorkOrderStatus.pending:
-        return 'Pending';
+      case WorkOrderStatus.newOrder:
+        return 'New';
+      case WorkOrderStatus.awaitingApproval:
+        return 'Awaiting Approval';
+      case WorkOrderStatus.readyToStart:
+        return 'Ready to Start';
       case WorkOrderStatus.inProgress:
         return 'In Progress';
-      case WorkOrderStatus.waitingParts:
-        return 'Waiting Parts';
-      case WorkOrderStatus.waitingApproval:
-        return 'Waiting Approval';
-      case WorkOrderStatus.waitingCustomer:
-        return 'Waiting Customer';
-      case WorkOrderStatus.completed:
-        return 'Completed';
-      case WorkOrderStatus.cancelled:
-        return 'Cancelled';
-      case WorkOrderStatus.invoiced:
-        return 'Invoiced';
+      case WorkOrderStatus.done:
+        return 'Done';
+      case WorkOrderStatus.closed:
+        return 'Closed';
     }
   }
 
   static WorkOrderStatus fromString(String status) {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return WorkOrderStatus.pending;
+      case 'new':
+        return WorkOrderStatus.newOrder;
+      case 'awaiting_approval':
+        return WorkOrderStatus.awaitingApproval;
+      case 'ready_to_start':
+        return WorkOrderStatus.readyToStart;
       case 'in_progress':
         return WorkOrderStatus.inProgress;
-      case 'waiting_parts':
-        return WorkOrderStatus.waitingParts;
-      case 'waiting_approval':
-        return WorkOrderStatus.waitingApproval;
-      case 'waiting_customer':
-        return WorkOrderStatus.waitingCustomer;
-      case 'completed':
-        return WorkOrderStatus.completed;
-      case 'cancelled':
-        return WorkOrderStatus.cancelled;
-      case 'invoiced':
-        return WorkOrderStatus.invoiced;
+      case 'done':
+        return WorkOrderStatus.done;
+      case 'closed':
+        return WorkOrderStatus.closed;
       default:
-        return WorkOrderStatus.pending;
+        return WorkOrderStatus.newOrder;
     }
   }
 
   String get backendValue {
     switch (this) {
-      case WorkOrderStatus.pending:
-        return 'pending';
+      case WorkOrderStatus.newOrder:
+        return 'new';
+      case WorkOrderStatus.awaitingApproval:
+        return 'awaiting_approval';
+      case WorkOrderStatus.readyToStart:
+        return 'ready_to_start';
       case WorkOrderStatus.inProgress:
         return 'in_progress';
-      case WorkOrderStatus.waitingParts:
-        return 'waiting_parts';
-      case WorkOrderStatus.waitingApproval:
-        return 'waiting_approval';
-      case WorkOrderStatus.waitingCustomer:
-        return 'waiting_customer';
-      case WorkOrderStatus.completed:
-        return 'completed';
-      case WorkOrderStatus.cancelled:
-        return 'cancelled';
-      case WorkOrderStatus.invoiced:
-        return 'invoiced';
+      case WorkOrderStatus.done:
+        return 'done';
+      case WorkOrderStatus.closed:
+        return 'closed';
     }
   }
 }
@@ -84,46 +70,39 @@ class WorkOrder {
   final int? id;
   final int customerId;
   final int vehicleId;
-  final int? assignedTo;
-  final String complaint;
-  final String? diagnosis;
+  final int createdBy;
+  final String? complaint;
   final WorkOrderStatus status;
-  final double? estimate;
-  final double? finalAmount;
+  final double? estParts;
+  final double? estLabor;
+  final double? estTotal;
+  final double? finalCost;
+  final String? warrantyText;
+  final String? notes;
   final DateTime? scheduledAt;
   final DateTime? startedAt;
   final DateTime? completedAt;
-  final String? notes;
   final DateTime? createdAt;
-  final DateTime? updatedAt;
-  // Temporarily comment out complex types
-  // final Customer? customer;
-  // final Vehicle? vehicle;
-  // final User? assignedUser;
-  final List<WorkOrderService>? services;
-  final List<WorkOrderMedia>? media;
+  final List<WorkOrderItem>? items;
 
   WorkOrder({
     this.id,
     required this.customerId,
     required this.vehicleId,
-    this.assignedTo,
-    required this.complaint,
-    this.diagnosis,
-    this.status = WorkOrderStatus.pending,
-    this.estimate,
-    this.finalAmount,
+    required this.createdBy,
+    this.complaint,
+    this.status = WorkOrderStatus.newOrder,
+    this.estParts,
+    this.estLabor,
+    this.estTotal,
+    this.finalCost,
+    this.warrantyText,
+    this.notes,
     this.scheduledAt,
     this.startedAt,
     this.completedAt,
-    this.notes,
     this.createdAt,
-    this.updatedAt,
-    // this.customer,
-    // this.vehicle,
-    // this.assignedUser,
-    this.services,
-    this.media,
+    this.items,
   });
 
   factory WorkOrder.fromJson(Map<String, dynamic> json) {
@@ -131,12 +110,15 @@ class WorkOrder {
       id: json['id'],
       customerId: json['customer_id'],
       vehicleId: json['vehicle_id'],
-      assignedTo: json['assigned_to'],
-      complaint: json['complaint'] ?? '',
-      diagnosis: json['diagnosis'],
-      status: WorkOrderStatus.fromString(json['status'] ?? 'pending'),
-      estimate: json['estimate']?.toDouble(),
-      finalAmount: json['final_amount']?.toDouble(),
+      createdBy: json['created_by'],
+      complaint: json['complaint'],
+      status: WorkOrderStatus.fromString(json['status'] ?? 'new'),
+      estParts: json['est_parts']?.toDouble(),
+      estLabor: json['est_labor']?.toDouble(),
+      estTotal: json['est_total']?.toDouble(),
+      finalCost: json['final_cost']?.toDouble(),
+      warrantyText: json['warranty_text'],
+      notes: json['notes'],
       scheduledAt: json['scheduled_at'] != null 
           ? DateTime.parse(json['scheduled_at'])
           : null,
@@ -146,28 +128,11 @@ class WorkOrder {
       completedAt: json['completed_at'] != null 
           ? DateTime.parse(json['completed_at'])
           : null,
-      notes: json['notes'],
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at'])
           : null,
-      updatedAt: json['updated_at'] != null 
-          ? DateTime.parse(json['updated_at'])
-          : null,
-      // Temporarily comment out complex fromJson calls
-      // customer: json['customer'] != null 
-      //     ? Customer.fromJson(json['customer'])
-      //     : null,
-      // vehicle: json['vehicle'] != null 
-      //     ? Vehicle.fromJson(json['vehicle'])
-      //     : null,
-      // assignedUser: json['assigned_user'] != null 
-      //     ? User.fromJson(json['assigned_user'])
-      //     : null,
-      services: json['services'] != null 
-          ? (json['services'] as List).map((s) => WorkOrderService.fromJson(s)).toList()
-          : null,
-      media: json['media'] != null 
-          ? (json['media'] as List).map((m) => WorkOrderMedia.fromJson(m)).toList()
+      items: json['items'] != null 
+          ? (json['items'] as List).map((item) => WorkOrderItem.fromJson(item)).toList()
           : null,
     );
   }
@@ -177,138 +142,110 @@ class WorkOrder {
       if (id != null) 'id': id,
       'customer_id': customerId,
       'vehicle_id': vehicleId,
-      'assigned_to': assignedTo,
       'complaint': complaint,
-      'diagnosis': diagnosis,
-      'status': status.backendValue,
-      'estimate': estimate,
-      'final_amount': finalAmount,
-      'scheduled_at': scheduledAt?.toIso8601String(),
-      'started_at': startedAt?.toIso8601String(),
-      'completed_at': completedAt?.toIso8601String(),
       'notes': notes,
     };
   }
 }
 
-class WorkOrderService {
-  final int? id;
-  final int workOrderId;
-  final String name;
-  final String? description;
-  final double price;
-  final int quantity;
-  final double total;
-
-  WorkOrderService({
-    this.id,
-    required this.workOrderId,
-    required this.name,
-    this.description,
-    required this.price,
-    this.quantity = 1,
-    required this.total,
-  });
-
-  factory WorkOrderService.fromJson(Map<String, dynamic> json) {
-    return WorkOrderService(
-      id: json['id'],
-      workOrderId: json['work_order_id'],
-      name: json['name'] ?? '',
-      description: json['description'],
-      price: json['price']?.toDouble() ?? 0.0,
-      quantity: json['quantity'] ?? 1,
-      total: json['total']?.toDouble() ?? 0.0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      if (id != null) 'id': id,
-      'work_order_id': workOrderId,
-      'name': name,
-      'description': description,
-      'price': price,
-      'quantity': quantity,
-      'total': total,
-    };
-  }
-}
-
-enum MediaType {
-  before,
-  during,
-  after;
+enum ItemType {
+  part,
+  labor;
 
   String get displayName {
     switch (this) {
-      case MediaType.before:
-        return 'BEFORE';
-      case MediaType.during:
-        return 'DURING';
-      case MediaType.after:
-        return 'AFTER';
-    }
-  }
-
-  static MediaType fromString(String type) {
-    switch (type.toLowerCase()) {
-      case 'before':
-        return MediaType.before;
-      case 'during':
-        return MediaType.during;
-      case 'after':
-        return MediaType.after;
-      default:
-        return MediaType.before;
+      case ItemType.part:
+        return 'Part';
+      case ItemType.labor:
+        return 'Labor';
     }
   }
 
   String get backendValue => name.toLowerCase();
+
+  static ItemType fromString(String type) {
+    switch (type.toLowerCase()) {
+      case 'part':
+        return ItemType.part;
+      case 'labor':
+        return ItemType.labor;
+      default:
+        return ItemType.part;
+    }
+  }
 }
 
-class WorkOrderMedia {
+class WorkOrderItem {
   final int? id;
-  final int workOrderId;
-  final String filename;
-  final String? description;
-  final MediaType type;
-  final String url;
-  final DateTime? createdAt;
+  final int? workOrderId;
+  final ItemType itemType;
+  final String name;
+  final double qty;
+  final double unitPrice;
 
-  WorkOrderMedia({
+  WorkOrderItem({
     this.id,
-    required this.workOrderId,
-    required this.filename,
-    this.description,
-    required this.type,
-    required this.url,
-    this.createdAt,
+    this.workOrderId,
+    required this.itemType,
+    required this.name,
+    required this.qty,
+    required this.unitPrice,
   });
 
-  factory WorkOrderMedia.fromJson(Map<String, dynamic> json) {
-    return WorkOrderMedia(
+  double get total => qty * unitPrice;
+
+  factory WorkOrderItem.fromJson(Map<String, dynamic> json) {
+    return WorkOrderItem(
       id: json['id'],
       workOrderId: json['work_order_id'],
-      filename: json['filename'] ?? '',
-      description: json['description'],
-      type: MediaType.fromString(json['type'] ?? 'before'),
-      url: json['url'] ?? '',
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'])
-          : null,
+      itemType: ItemType.fromString(json['item_type'] ?? 'part'),
+      name: json['name'] ?? '',
+      qty: json['qty']?.toDouble() ?? 1.0,
+      unitPrice: json['unit_price']?.toDouble() ?? 0.0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      if (id != null) 'id': id,
-      'work_order_id': workOrderId,
-      'filename': filename,
-      'description': description,
-      'type': type.backendValue,
-      'url': url,
+      'item_type': itemType.backendValue,
+      'name': name,
+      'qty': qty,
+      'unit_price': unitPrice,
     };
+  }
+}
+
+// Search filters for work orders
+class WorkOrderSearchFilters {
+  final String? query;
+  final WorkOrderStatus? status;
+  final int? customerId;
+  final int? vehicleId;
+  final DateTime? dateFrom;
+  final DateTime? dateTo;
+  final int? page;
+  final int? limit;
+
+  WorkOrderSearchFilters({
+    this.query,
+    this.status,
+    this.customerId,
+    this.vehicleId,
+    this.dateFrom,
+    this.dateTo,
+    this.page = 1,
+    this.limit = 10,
+  });
+
+  Map<String, dynamic> toQueryParameters() {
+    final params = <String, dynamic>{};
+    if (query != null && query!.isNotEmpty) params['search'] = query;
+    if (status != null) params['status'] = status!.backendValue;
+    if (customerId != null) params['customer_id'] = customerId;
+    if (vehicleId != null) params['vehicle_id'] = vehicleId;
+    if (page != null) params['page'] = page;
+    if (limit != null) params['size'] = limit;
+    return params;
   }
 }
 

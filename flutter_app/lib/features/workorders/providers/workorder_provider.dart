@@ -126,6 +126,28 @@ class WorkOrderNotifier extends StateNotifier<AsyncValue<List<WorkOrder>>> {
     }
   }
 
+  Future<WorkOrder> updateEstimate(int id, {double? estParts, double? estLabor}) async {
+    try {
+      final workOrder = await _apiService.setEstimate(id, estParts: estParts, estLabor: estLabor);
+      // Refresh the list
+      await _loadWorkOrders();
+      return workOrder;
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<WorkOrder> scheduleWorkOrder(int id, DateTime scheduledAt) async {
+    try {
+      final workOrder = await _apiService.scheduleWorkOrder(id, scheduledAt);
+      // Refresh the list
+      await _loadWorkOrders();
+      return workOrder;
+    } catch (error) {
+      rethrow;
+    }
+  }
+
   // Method to invalidate all work order providers
   void invalidateProviders(WidgetRef ref) {
     ref.invalidate(workOrderListProvider);

@@ -168,28 +168,24 @@ class WorkOrderApiService {
   }
 
   // Work Order Items (Services/Parts) management
-  Future<WorkOrderItemResponse> addItem(int workOrderId, {
-    required String itemType, // 'service' or 'part'
-    required String name,
-    required double price,
-    int quantity = 1,
-    String? description,
-  }) async {
+  Future<WorkOrderItem> addWorkOrderItem(int workOrderId, WorkOrderItem item) async {
     final response = await _httpClient.post(
       '/api/v1/workorders/$workOrderId/items',
-      data: {
-        'item_type': itemType,
-        'name': name,
-        'price': price,
-        'quantity': quantity,
-        'description': description,
-      },
+      data: item.toJson(),
     );
-    return WorkOrderItemResponse.fromJson(response.data);
+    return WorkOrderItem.fromJson(response.data);
   }
 
-  Future<void> deleteItem(int itemId) async {
+  Future<void> deleteWorkOrderItem(int itemId) async {
     await _httpClient.delete('/api/v1/workorders/items/$itemId');
+  }
+
+  Future<WorkOrder> scheduleWorkOrder(int id, DateTime scheduledAt) async {
+    final response = await _httpClient.patch(
+      '/api/v1/workorders/$id/schedule',
+      data: {'scheduled_at': scheduledAt.toIso8601String()},
+    );
+    return WorkOrder.fromJson(response.data);
   }
 
   Future<String> getPublicApprovalUrl(String token) async {
