@@ -15,10 +15,13 @@ final workOrderListProvider = FutureProvider<List<WorkOrder>>((ref) async {
   
   final response = await apiService.getWorkOrders(
     page: filters.page,
-    size: filters.size,
+    size: filters.limit,
     status: filters.status?.backendValue,
     customerId: filters.customerId,
     vehicleId: filters.vehicleId,
+    technicianId: filters.technicianId,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
   );
   
   return response.items;
@@ -196,42 +199,6 @@ final pendingApprovalsProvider = FutureProvider<List<WorkOrder>>((ref) async {
   return apiService.getPendingApprovals();
 });
 
-// Search filters class
-class WorkOrderSearchFilters {
-  final int page;
-  final int size;
-  final WorkOrderStatus? status;
-  final int? customerId;
-  final int? vehicleId;
-  final String? searchQuery;
-
-  WorkOrderSearchFilters({
-    this.page = 1,
-    this.size = 10,
-    this.status,
-    this.customerId,
-    this.vehicleId,
-    this.searchQuery,
-  });
-
-  WorkOrderSearchFilters copyWith({
-    int? page,
-    int? size,
-    WorkOrderStatus? status,
-    int? customerId,
-    int? vehicleId,
-    String? searchQuery,
-  }) {
-    return WorkOrderSearchFilters(
-      page: page ?? this.page,
-      size: size ?? this.size,
-      status: status ?? this.status,
-      customerId: customerId ?? this.customerId,
-      vehicleId: vehicleId ?? this.vehicleId,
-      searchQuery: searchQuery ?? this.searchQuery,
-    );
-  }
-}
 
 // Parameters for media provider
 class WorkOrderMediaParams {

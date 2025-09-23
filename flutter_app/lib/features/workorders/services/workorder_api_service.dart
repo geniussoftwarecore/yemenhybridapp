@@ -20,6 +20,9 @@ class WorkOrderApiService {
     String? status,
     int? customerId,
     int? vehicleId,
+    int? technicianId,
+    DateTime? dateFrom,
+    DateTime? dateTo,
   }) async {
     final queryParams = <String, dynamic>{
       'page': page,
@@ -28,6 +31,9 @@ class WorkOrderApiService {
     if (status != null) queryParams['status'] = status;
     if (customerId != null) queryParams['customer_id'] = customerId;
     if (vehicleId != null) queryParams['vehicle_id'] = vehicleId;
+    if (technicianId != null) queryParams['technician_id'] = technicianId;
+    if (dateFrom != null) queryParams['date_from'] = dateFrom.toIso8601String();
+    if (dateTo != null) queryParams['date_to'] = dateTo.toIso8601String();
     
     final response = await _httpClient.get(
       '/api/v1/workorders',

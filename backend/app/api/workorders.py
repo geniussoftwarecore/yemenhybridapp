@@ -47,6 +47,9 @@ async def get_workorders(
     status: Optional[WorkOrderStatus] = Query(None, description="Filter by status"),
     customer_id: Optional[int] = Query(None, description="Filter by customer ID"),
     vehicle_id: Optional[int] = Query(None, description="Filter by vehicle ID"),
+    technician_id: Optional[int] = Query(None, description="Filter by technician ID (created_by)"),
+    date_from: Optional[datetime] = Query(None, description="Filter by creation date from"),
+    date_to: Optional[datetime] = Query(None, description="Filter by creation date to"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -58,6 +61,9 @@ async def get_workorders(
     - **status**: Filter by work order status
     - **customer_id**: Filter by customer ID
     - **vehicle_id**: Filter by vehicle ID
+    - **technician_id**: Filter by technician (created_by user)
+    - **date_from**: Filter by creation date from
+    - **date_to**: Filter by creation date to
     """
     # Build query
     query = select(WorkOrder).options(selectinload(WorkOrder.items))
@@ -75,6 +81,18 @@ async def get_workorders(
     if vehicle_id:
         query = query.where(WorkOrder.vehicle_id == vehicle_id)
         count_query = count_query.where(WorkOrder.vehicle_id == vehicle_id)
+    
+    if technician_id:
+        query = query.where(WorkOrder.created_by == technician_id)
+        count_query = count_query.where(WorkOrder.created_by == technician_id)
+    
+    if date_from:
+        query = query.where(WorkOrder.created_at >= date_from)
+        count_query = count_query.where(WorkOrder.created_at >= date_from)
+    
+    if date_to:
+        query = query.where(WorkOrder.created_at <= date_to)
+        count_query = count_query.where(WorkOrder.created_at <= date_to)
     
     # Get total count
     total_result = await db.execute(count_query)

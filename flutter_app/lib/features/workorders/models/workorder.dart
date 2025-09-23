@@ -229,6 +229,7 @@ class WorkOrderSearchFilters {
   final WorkOrderStatus? status;
   final int? customerId;
   final int? vehicleId;
+  final int? technicianId;
   final DateTime? dateFrom;
   final DateTime? dateTo;
   final int? page;
@@ -239,6 +240,7 @@ class WorkOrderSearchFilters {
     this.status,
     this.customerId,
     this.vehicleId,
+    this.technicianId,
     this.dateFrom,
     this.dateTo,
     this.page = 1,
@@ -251,6 +253,9 @@ class WorkOrderSearchFilters {
     if (status != null) params['status'] = status!.backendValue;
     if (customerId != null) params['customer_id'] = customerId;
     if (vehicleId != null) params['vehicle_id'] = vehicleId;
+    if (technicianId != null) params['technician_id'] = technicianId;
+    if (dateFrom != null) params['date_from'] = dateFrom!.toIso8601String();
+    if (dateTo != null) params['date_to'] = dateTo!.toIso8601String();
     if (page != null) params['page'] = page;
     if (limit != null) params['size'] = limit;
     return params;

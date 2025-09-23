@@ -17,6 +17,7 @@ class _WorkOrdersListPageState extends ConsumerState<WorkOrdersListPage> {
   String _searchQuery = '';
   DateTime? _dateFrom;
   DateTime? _dateTo;
+  int? _selectedTechnicianId;
 
   @override
   Widget build(BuildContext context) {
@@ -285,6 +286,7 @@ class _WorkOrdersListPageState extends ConsumerState<WorkOrdersListPage> {
     ref.read(workOrderSearchFiltersProvider.notifier).state = WorkOrderSearchFilters(
       query: _searchQuery.isEmpty ? null : _searchQuery,
       status: _selectedStatus,
+      technicianId: _selectedTechnicianId,
       dateFrom: _dateFrom,
       dateTo: _dateTo,
     );
@@ -298,6 +300,23 @@ class _WorkOrdersListPageState extends ConsumerState<WorkOrdersListPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Technician filter
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Technician ID (optional)',
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(),
+                helperText: 'Enter technician user ID to filter by technician',
+              ),
+              keyboardType: TextInputType.number,
+              initialValue: _selectedTechnicianId?.toString(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedTechnicianId = value.isNotEmpty ? int.tryParse(value) : null;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
             // Date range filters
             ListTile(
               title: const Text('Date From'),
@@ -341,6 +360,7 @@ class _WorkOrdersListPageState extends ConsumerState<WorkOrdersListPage> {
           TextButton(
             onPressed: () {
               setState(() {
+                _selectedTechnicianId = null;
                 _dateFrom = null;
                 _dateTo = null;
               });
